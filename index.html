@@ -1,180 +1,99 @@
-
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador de Propostas com Firebase</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    header, footer {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .btn {
-      background: linear-gradient(to right, #1a2a6c, #b21f1f);
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .proposal-list {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-    .proposal-list th, .proposal-list td {
-      padding: 10px;
-      border-bottom: 1px solid #ccc;
-    }
-    .status-badge {
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-weight: bold;
-    }
-    .status-elaboracao { background: #ffeb3b; }
-    .status-aprovacao { background: #2196f3; color: white; }
-    .status-aprovado { background: #4caf50; color: white; }
-    .status-cancelado { background: #f44336; color: white; }
-  </style>
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg",
-      authDomain: "gera-propostas.firebaseapp.com",
-      projectId: "gera-propostas",
-      storageBucket: "gera-propostas.firebasestorage.app",
-      messagingSenderId: "517918747792",
-      appId: "1:517918747792:web:568b86b22e0e5709823c15",
-      measurementId: "G-CJCK09C7D8"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-  </script>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas (Firebase)</h1>
-      <p>Salvamento online com Firestore</p>
-    </header>
-
-    <div class="form-group">
-      <label for="proposal-title">Título</label>
-      <input type="text" id="proposal-title">
-    </div>
-    <div class="form-group">
-      <label for="proposal-link">Link</label>
-      <input type="text" id="proposal-link">
-    </div>
-    <div class="form-group">
-      <label for="proposal-status">Status</label>
-      <select id="proposal-status">
-        <option value="elaboracao">Em elaboração</option>
-        <option value="aprovacao">Em aprovação</option>
-        <option value="aprovado">Aprovado</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
-    </div>
-    <button class="btn" onclick="addProposal()">Salvar Proposta</button>
-
-    <table class="proposal-list">
-      <thead>
-        <tr><th>Título</th><th>Status</th><th>Link</th><th>Ações</th></tr>
-      </thead>
-      <tbody id="proposals-list"></tbody>
-    </table>
-  </div>
-
-  <script>
-    const titleInput = document.getElementById('proposal-title');
-    const linkInput = document.getElementById('proposal-link');
-    const statusSelect = document.getElementById('proposal-status');
-    const listTable = document.getElementById('proposals-list');
-
-    function renderProposals() {
-      db.collection("propostas").orderBy("createdAt", "desc").get().then(snapshot => {
-        listTable.innerHTML = "";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const tr = document.createElement("tr");
-          const statusClass = "status-" + data.status;
-          tr.innerHTML = `
-            <td>${data.title}</td>
-            <td><span class="status-badge ${statusClass}">${formatStatus(data.status)}</span></td>
-            <td><a href="${data.link}" target="_blank">🔗</a></td>
-            <td><button onclick="deleteProposal('${doc.id}')">🗑️</button></td>
-          `;
-          listTable.appendChild(tr);
-        });
-      });
-    }
-
-    function addProposal() {
-      const title = titleInput.value.trim();
-      const link = linkInput.value.trim();
-      const status = statusSelect.value;
-      if (!title) return alert("Digite um título");
-      db.collection("propostas").add({
-        title, link, status,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        titleInput.value = "";
-        linkInput.value = "";
-        statusSelect.value = "elaboracao";
-        renderProposals();
-      });
-    }
-
-    function deleteProposal(id) {
-      if (confirm("Deseja excluir esta proposta?")) {
-        db.collection("propostas").doc(id).delete().then(() => {
-          renderProposals();
-        });
-      }
-    }
-
-    function formatStatus(status) {
-      switch (status) {
-        case "elaboracao": return "Em elaboração";
-        case "aprovacao": return "Em aprovação";
-        case "aprovado": return "Aprovado";
-        case "cancelado": return "Cancelado";
-        default: return status;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", renderProposals);
-  </script>
-</body>
-</html>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    padding: 20px;
+    margin: 0;
+    color: #f0f0f0;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+  }
+  header {
+    text-align: center;
+    padding: 20px 0;
+    background: linear-gradient(to right, #333, #000);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 30px;
+  }
+  h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #ccc;
+  }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    background-color: #2a2a2a;
+    color: #f0f0f0;
+    border: 1px solid #555;
+    border-radius: 5px;
+  }
+  input::placeholder {
+    color: #aaa;
+  }
+  .btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover {
+    background-color: #444;
+  }
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 12px;
+    border-bottom: 1px solid #444;
+  }
+  th {
+    background-color: #222;
+    color: white;
+  }
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    display: inline-block;
+  }
+  .status-elaboracao { background: #fdd835; color: #000; }
+  .status-aprovacao { background: #1976d2; color: white; }
+  .status-aprovado  { background: #388e3c; color: white; }
+  .status-cancelado { background: #d32f2f; color: white; }
+  .markdown-container {
+    background-color: #2c2c2c;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid #444;
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    color: #e0e0e0;
+  }
+</style>
