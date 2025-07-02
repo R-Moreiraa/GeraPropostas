@@ -1,99 +1,568 @@
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    padding: 20px;
-    margin: 0;
-    color: #f0f0f0;
-    min-height: 100vh;
-  }
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    background-color: #1e1e1e;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-  }
-  header {
-    text-align: center;
-    padding: 20px 0;
-    background: linear-gradient(to right, #333, #000);
-    color: white;
-    border-radius: 10px;
-    margin-bottom: 30px;
-  }
-  h1 {
-    font-size: 2rem;
-    margin: 0;
-  }
-  .form-group {
-    margin-bottom: 15px;
-  }
-  label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    color: #ccc;
-  }
-  input, select {
-    width: 100%;
-    padding: 10px;
-    background-color: #2a2a2a;
-    color: #f0f0f0;
-    border: 1px solid #555;
-    border-radius: 5px;
-  }
-  input::placeholder {
-    color: #aaa;
-  }
-  .btn {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background: #333;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .btn:hover {
-    background-color: #444;
-  }
-  table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
-  }
-  th, td {
-    padding: 12px;
-    border-bottom: 1px solid #444;
-  }
-  th {
-    background-color: #222;
-    color: white;
-  }
-  .status-badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 0.85rem;
-    display: inline-block;
-  }
-  .status-elaboracao { background: #fdd835; color: #000; }
-  .status-aprovacao { background: #1976d2; color: white; }
-  .status-aprovado  { background: #388e3c; color: white; }
-  .status-cancelado { background: #d32f2f; color: white; }
-  .markdown-container {
-    background-color: #2c2c2c;
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 20px;
-    border: 1px solid #444;
-    font-family: 'Courier New', monospace;
-    white-space: pre-wrap;
-    max-height: 300px;
-    overflow-y: auto;
-    color: #e0e0e0;
-  }
-</style>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Status de Proposta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #000;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: #000;
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: #1a2a6c;
+            border-bottom: 2px solid #b21f1f;
+            padding-bottom: 10px;
+            margin: 25px 0 15px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus {
+            border-color: #1a2a6c;
+            outline: none;
+            box-shadow: 0 0 5px rgba(26, 42, 108, 0.3);
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .proposal-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .proposal-list th {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .proposal-list td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .proposal-list tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .proposal-list tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .status-elaboracao {
+            background-color: #ffeb3b;
+            color: #333;
+        }
+        
+        .status-aprovacao {
+            background-color: #2196f3;
+            color: white;
+        }
+        
+        .status-aprovado {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .status-cancelado {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            color: #1a2a6c;
+        }
+        
+        .delete-btn {
+            color: #b21f1f;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .markdown-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .download-btn {
+            margin-top: 20px;
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+        }
+        
+        .notification.error {
+            background: linear-gradient(to right, #f44336, #b71c1c);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .proposal-list {
+                font-size: 0.9rem;
+            }
+            
+            .proposal-list th, .proposal-list td {
+                padding: 10px;
+            }
+        }
+    </style>
+	
+	<!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg",
+      authDomain: "gera-propostas.firebaseapp.com",
+      projectId: "gera-propostas",
+      storageBucket: "gera-propostas.firebasestorage.app",
+      messagingSenderId: "517918747792",
+      appId: "1:517918747792:web:568b86b22e0e5709823c15",
+      measurementId: "G-CJCK09C7D8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
+      <p>Salvando dados com Firebase Firestore</p>
+    </header>
+	
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-contract"></i> Gerador de Status de Proposta</h1>
+            <p>Gerencie suas propostas e gere relatórios em Markdown</p>
+        </header>
+        
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
+            <div class="form-group">
+                <label for="proposal-title">Título da Proposta</label>
+                <input type="text" id="proposal-title" placeholder="Digite o título da proposta">
+            </div>
+            
+            <div class="form-group">
+                <label for="proposal-link">Link da Proposta</label>
+                <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta">
+            </div>
+            
+            <div class="form-group">
+                <label for="proposal-status">Status da Proposta</label>
+                <select id="proposal-status">
+                    <option value="elaboracao">Em elaboração</option>
+                    <option value="aprovacao">Em aprovação do cliente</option>
+                    <option value="aprovado">Aprovado</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+            </div>
+            
+            <button id="add-proposal" class="btn">
+                <i class="fas fa-save"></i> Salvar Proposta
+            </button>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-list"></i> Lista de Propostas</h2>
+            <table class="proposal-list">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="proposals-list">
+                    <!-- As propostas serão inseridas aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fab fa-markdown"></i> Tabela Markdown Gerada</h2>
+            <p>Esta tabela será atualizada automaticamente conforme as propostas são adicionadas ou editadas.</p>
+            
+            <div class="markdown-container" id="markdown-output">
+                <!-- O Markdown será gerado aqui -->
+            </div>
+            
+            <button id="download-md" class="btn download-btn">
+                <i class="fas fa-download"></i> Baixar Markdown
+            </button>
+        </div>
+    </div>
+    
+    <footer>
+        Gerador de Status de Proposta &copy; 2023 - Todos os direitos reservados
+    </footer>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Banco de dados local (simulado)
+        let proposals = JSON.parse(localStorage.getItem('proposals')) || [];
+        
+        // Elementos DOM
+        const proposalTitleInput = document.getElementById('proposal-title');
+        const proposalLinkInput = document.getElementById('proposal-link');
+        const proposalStatusSelect = document.getElementById('proposal-status');
+        const addProposalBtn = document.getElementById('add-proposal');
+        const proposalsList = document.getElementById('proposals-list');
+        const markdownOutput = document.getElementById('markdown-output');
+        const downloadBtn = document.getElementById('download-md');
+        const notification = document.getElementById('notification');
+        
+        // Função para mostrar notificação
+        function showNotification(message, isSuccess = true) {
+            notification.textContent = message;
+            notification.className = isSuccess ? 'notification success show' : 'notification error show';
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Função para renderizar a lista de propostas
+        function renderProposals() {
+            proposalsList.innerHTML = '';
+            
+            if (proposals.length === 0) {
+                proposalsList.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 30px;">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
+                            <p>Nenhuma proposta cadastrada ainda.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            proposals.forEach((proposal, index) => {
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(proposal.status) {
+                    case 'elaboracao':
+                        statusClass = 'status-elaboracao';
+                        statusText = 'Em elaboração';
+                        break;
+                    case 'aprovacao':
+                        statusClass = 'status-aprovacao';
+                        statusText = 'Em aprovação';
+                        break;
+                    case 'aprovado':
+                        statusClass = 'status-aprovado';
+                        statusText = 'Aprovado';
+                        break;
+                    case 'cancelado':
+                        statusClass = 'status-cancelado';
+                        statusText = 'Cancelado';
+                        break;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${proposal.title}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editProposal(${index})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteProposal(${index})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                
+                proposalsList.appendChild(row);
+            });
+            
+            // Atualiza o Markdown
+            generateMarkdown();
+        }
+        
+        // Função para adicionar uma nova proposta
+        function addProposal() {
+            const title = proposalTitleInput.value.trim();
+            const link = proposalLinkInput.value.trim();
+            const status = proposalStatusSelect.value;
+            
+            if (!title) {
+                showNotification('Por favor, insira um título para a proposta!', false);
+                return;
+            }
+            
+            const newProposal = {
+                id: Date.now(), // ID único baseado no timestamp
+                title,
+                link,
+                status
+            };
+            
+            proposals.push(newProposal);
+            localStorage.setItem('proposals', JSON.stringify(proposals));
+            
+            // Limpa os campos
+            proposalTitleInput.value = '';
+            proposalLinkInput.value = '';
+            proposalStatusSelect.value = 'elaboracao';
+            
+            showNotification('Proposta adicionada com sucesso!');
+            renderProposals();
+        }
+        
+        // Função para editar uma proposta
+        function editProposal(index) {
+            const proposal = proposals[index];
+            
+            // Preenche o formulário com os dados da proposta
+            proposalTitleInput.value = proposal.title;
+            proposalLinkInput.value = proposal.link;
+            proposalStatusSelect.value = proposal.status;
+            
+            // Remove a proposta da lista
+            proposals.splice(index, 1);
+            localStorage.setItem('proposals', JSON.stringify(proposals));
+            
+            showNotification('Proposta carregada para edição!');
+            renderProposals();
+        }
+        
+        // Função para excluir uma proposta
+        function deleteProposal(index) {
+            if (confirm('Tem certeza que deseja excluir esta proposta?')) {
+                proposals.splice(index, 1);
+                localStorage.setItem('proposals', JSON.stringify(proposals));
+                showNotification('Proposta excluída com sucesso!');
+                renderProposals();
+            }
+        }
+        
+        // Função para gerar a tabela em Markdown
+        function generateMarkdown() {
+            if (proposals.length === 0) {
+                markdownOutput.textContent = '## Nenhuma proposta cadastrada';
+                return;
+            }
+            
+            let markdown = '## Lista de Propostas\n\n';
+            markdown += '| Título | Status | Link |\n';
+            markdown += '|--------|--------|------|\n';
+            
+            proposals.forEach(proposal => {
+                let statusText = '';
+                
+                switch(proposal.status) {
+                    case 'elaboracao':
+                        statusText = 'Em elaboração';
+                        break;
+                    case 'aprovacao':
+                        statusText = 'Em aprovação do cliente';
+                        break;
+                    case 'aprovado':
+                        statusText = 'Aprovado';
+                        break;
+                    case 'cancelado':
+                        statusText = 'Cancelado';
+                        break;
+                }
+                
+                markdown += `| ${proposal.title} | ${statusText} | [Link](${proposal.link}) |\n`;
+            });
+            
+            markdownOutput.textContent = markdown;
+        }
+        
+        // Função para baixar o Markdown
+        function downloadMarkdown() {
+            if (proposals.length === 0) {
+                showNotification('Não há propostas para exportar!', false);
+                return;
+            }
+            
+            const content = markdownOutput.textContent;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'propostas.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Markdown baixado com sucesso!');
+        }
+        
+        // Event Listeners
+        addProposalBtn.addEventListener('click', addProposal);
+        downloadBtn.addEventListener('click', downloadMarkdown);
+        
+        // Inicializa a aplicação
+        document.addEventListener('DOMContentLoaded', renderProposals);
+        
+        // Adiciona suporte para pressionar Enter no título
+        proposalTitleInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                addProposal();
+            }
+        });
+        
+        // Expor funções para o escopo global (para os botões de ação)
+        window.editProposal = editProposal;
+        window.deleteProposal = deleteProposal;
+    </script>
+</body>
+</html>
