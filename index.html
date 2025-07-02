@@ -258,6 +258,27 @@
                 padding: 10px;
             }
         }
+
+        /* Novo estilo para o filtro */
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .filter-container label {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        
+        .filter-container select {
+            flex: 1;
+        }
+        
+        .filter-btn {
+            background: #1a2a6c;
+        }
   </style>
 
   <!-- Firebase SDK -->
@@ -341,6 +362,18 @@
 
       <div class="card">
         <h2><i class="fas fa-list"></i> Lista de Propostas</h2>
+        
+        <!-- Filtro por cliente -->
+        <div class="filter-container">
+          <label for="proposal-filter">Filtrar por Cliente:</label>
+          <select id="proposal-filter">
+            <option value="all">Todos os Clientes</option>
+          </select>
+          <button id="apply-filter" class="btn filter-btn">
+            <i class="fas fa-filter"></i> Aplicar
+          </button>
+        </div>
+        
         <table class="proposal-list">
           <thead>
             <tr>
@@ -367,12 +400,12 @@
   </div>
 
   <script>
-    // Configuração Firebase (adaptada)
+    // Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg",
       authDomain: "gera-propostas.firebaseapp.com",
       projectId: "gera-propostas",
-      storageBucket: "gera-propostas.firebasestorage.app",
+      storageBucket: "gera-propostas.appspot.com",
       messagingSenderId: "517918747792",
       appId: "1:517918747792:web:568b86b22e0e5709823c15",
       measurementId: "G-CJCK09C7D8"
@@ -407,10 +440,15 @@
     const proposalsList = document.getElementById('proposals-list');
     const markdownOutput = document.getElementById('markdown-output');
 
+    // Elementos de Filtro (novos)
+    const proposalFilter = document.getElementById('proposal-filter');
+    const applyFilterBtn = document.getElementById('apply-filter');
+
     // Variáveis
     let confirmationResult;
     let clients = [];
     let proposals = [];
+    let currentFilter = "all";
 
     function showNotification(message, isSuccess = true) {
       notification.textContent = message;
@@ -503,6 +541,7 @@
       const user = auth.currentUser;
       if (!user) {
         clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+        proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
         clients = [];
         return;
       }
@@ -511,6 +550,7 @@
         .then(snapshot => {
           clients = [];
           clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+          proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
 
           if (snapshot.empty) {
             return;
@@ -520,10 +560,17 @@
             const client = { ...doc.data(), docId: doc.id };
             clients.push(client);
 
+            // Opção para o seletor de clientes
             const option = document.createElement('option');
             option.value = client.docId;
             option.textContent = client.name;
             clientsSelect.appendChild(option);
+
+            // Opção para o filtro
+            const filterOption = document.createElement('option');
+            filterOption.value = client.docId;
+            filterOption.textContent = client.name;
+            proposalFilter.appendChild(filterOption);
           });
         })
         .catch(error => {
@@ -606,6 +653,7 @@
         });
 
         renderProposals();
+        generateMarkdown();
       }).catch(error => {
         showNotification('Erro ao carregar propostas: ' + error.message, false);
       });
@@ -619,8 +667,14 @@
         return;
       }
 
+      // Filtrar propostas pelo cliente selecionado
+      let filteredProposals = proposals;
+      if (currentFilter !== "all") {
+        filteredProposals = proposals.filter(p => p.clientId === currentFilter);
+      }
+
       // Agrupar propostas por cliente
-      const groupedByClient = proposals.reduce((acc, proposal) => {
+      const groupedByClient = filteredProposals.reduce((acc, proposal) => {
         if (!acc[proposal.clientId]) {
           acc[proposal.clientId] = {
             clientName: proposal.clientName,
@@ -658,11 +712,93 @@
           proposalsList.appendChild(row);
         });
       }
-
-      generateMarkdown();
     }
 
-    function editProposalByDocId(docId) {
+    function generateMarkdown() {
+      if (proposals.length === 0) {
+        markdownOutput.textContent = '## Nenhuma proposta cadastrada';
+        return;
+      }
+
+      // Filtrar propostas pelo cliente selecionado
+      let filteredProposals = proposals;
+      if (currentFilter !== "all") {
+        filteredProposals = proposals.filter(p => p.clientId === currentFilter);
+      }
+
+      const groupedByClient = filteredProposals.reduce((acc, p) => {
+        if (!acc[p.clientId]) {
+          acc[p.clientId] = {
+            clientName: p.clientName,
+            proposals: []
+          };
+        }
+        acc[p.clientId].proposals.push(p);
+        return acc;
+      }, {});
+
+      let markdown = '';
+      
+      if (currentFilter === "all") {
+        markdown += '## Lista de Propostas para Todos os Clientes\n\n';
+      } else {
+        const client = clients.find(c => c.docId === currentFilter);
+        markdown += `## Lista de Propostas para: ${client ? client.name : 'Cliente Selecionado'}\n\n`;
+      }
+
+      for (const clientId in groupedByClient) {
+        const group = groupedByClient[clientId];
+        
+        if (currentFilter === "all") {
+          markdown += `### Cliente: ${group.clientName}\n\n`;
+        }
+        
+        markdown += '| Título | Status | Link |\n|--------|--------|------|\n';
+
+        group.proposals.forEach(p => {
+          const statusMap = {
+            'elaboracao': 'Em elaboração',
+            'aprovacao': 'Em aprovação do cliente',
+            'aprovado': 'Aprovado',
+            'cancelado': 'Cancelado'
+          };
+          markdown += `| ${p.title} | ${statusMap[p.status]} | [Link](${p.link || '#'}) |\n`;
+        });
+
+        markdown += '\n';
+      }
+
+      markdownOutput.textContent = markdown;
+    }
+
+    // Aplicar filtro
+    applyFilterBtn.addEventListener('click', () => {
+      currentFilter = proposalFilter.value;
+      renderProposals();
+      generateMarkdown();
+    });
+
+    // Download markdown
+    document.getElementById('download-md').addEventListener('click', () => {
+      const markdown = markdownOutput.textContent;
+      const blob = new Blob([markdown], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      if (currentFilter === "all") {
+        a.download = 'propostas-todos.md';
+      } else {
+        const client = clients.find(c => c.docId === currentFilter);
+        a.download = `propostas-${client ? client.name.replace(/\s+/g, '-') : 'cliente'}.md`;
+      }
+      
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Funções globais para os botões de ação
+    window.editProposalByDocId = function(docId) {
       const proposal = proposals.find(p => p.docId === docId);
       if (!proposal) return;
 
@@ -679,7 +815,7 @@
         });
     }
 
-    function deleteProposalByDocId(docId) {
+    window.deleteProposalByDocId = function(docId) {
       if (!confirm('Tem certeza que deseja excluir esta proposta?')) return;
 
       db.collection('propostas').doc(docId).delete()
@@ -688,55 +824,6 @@
           loadProposals();
         });
     }
-
-    function generateMarkdown() {
-      if (proposals.length === 0) return markdownOutput.textContent = '## Nenhuma proposta cadastrada';
-
-      const groupedByClient = proposals.reduce((acc, p) => {
-        if (!acc[p.clientId]) {
-          acc[p.clientId] = {
-            clientName: p.clientName,
-            proposals: []
-          };
-        }
-        acc[p.clientId].proposals.push(p);
-        return acc;
-      }, {});
-
-      let markdown = '## Lista de Propostas\n\n';
-
-      for (const clientId in groupedByClient) {
-        const group = groupedByClient[clientId];
-        markdown += `### Cliente: ${group.clientName}\n\n`;
-        markdown += '| Título | Status | Link |\n|--------|--------|------|\n';
-
-        group.proposals.forEach(p => {
-          const statusMap = {
-            'elaboracao': 'Em elaboração',
-            'aprovacao': 'Em aprovação do cliente',
-            'aprovado': 'Aprovado',
-            'cancelado': 'Cancelado'
-          };
-          markdown += `| ${p.title} | ${statusMap[p.status]} | [Link](${p.link}) |\n`;
-        });
-
-        markdown += '\n';
-      }
-
-      markdownOutput.textContent = markdown;
-    }
-
-    // Download markdown
-    document.getElementById('download-md').addEventListener('click', () => {
-      const markdown = markdownOutput.textContent;
-      const blob = new Blob([markdown], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'propostas.md';
-      a.click();
-      URL.revokeObjectURL(url);
-    });
   </script>
 </body>
 </html>
