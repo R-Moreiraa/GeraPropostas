@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gerador de Propostas com Firebase - Login por Telefone</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
- <<style>
+ <style>
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +14,7 @@
         }
         
         body {
-            background: White;
+            background: white;
             color: #333;
             padding: 20px;
             min-height: 100vh;
@@ -264,8 +264,8 @@
 <body>
   <div class="container">
     <header>
-      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
-      <p>Gerencie suas propostas e gere relatórios em Markdown</p>
+<h1><font color="white">Gerador de Propostas </h1></font>
+     <font color="white"> <p style="text-align: center;">Gerencie suas propostas e gere relatórios em Markdown</font></p>
     </header>
 
     <!-- Tela de login -->
@@ -273,7 +273,7 @@
       <h2>Login / Cadastro por Telefone</h2>
 
       <div class="form-group">
-        <label for="phone-number">Número de telefone (+55 11 99999-9999)</label>
+        <label for="phone-number"><font color="#000">Número de telefone</font></label>
         <input type="text" id="phone-number" placeholder="+55 11 99999-9999" />
       </div>
 
@@ -283,7 +283,7 @@
 
       <div id="verification-code-section" class="hidden">
         <div class="form-group">
-          <label for="verification-code">Código de Verificação</label>
+          <label for="verification-code"><font color="#000">Código de Verificação</font></label>
           <input type="text" id="verification-code" placeholder="Digite o código recebido" />
         </div>
         <button id="verify-code-btn" class="btn"><i class="fas fa-check"></i> Verificar Código</button>
@@ -300,15 +300,15 @@
       <div class="card">
         <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
         <div class="form-group">
-          <label for="proposal-title">Título da Proposta</label>
+          <label for="proposal-title"><font color="#000">Título da Proposta </font> </label>
           <input type="text" id="proposal-title" placeholder="Digite o título da proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-link">Link da Proposta</label>
+          <label for="proposal-link"><font color="#000">Link da Proposta</font></label>
           <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-status">Status da Proposta</label>
+          <label for="proposal-status"><font color="#000">Status da Proposta</font></label>
           <select id="proposal-status">
             <option value="elaboracao">🟡Em elaboração</option>
             <option value="aprovacao">🟠Em aprovação do cliente</option>
