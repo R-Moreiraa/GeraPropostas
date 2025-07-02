@@ -14,7 +14,7 @@
     }
     
     body {
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #1a2a6c, #b21f1f, #000);
       color: #333;
       padding: 20px;
       min-height: 100vh;
@@ -37,7 +37,7 @@
     header {
       text-align: center;
       padding: 25px 0;
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #1a2a6c, #b21f1f);
       color: white;
       border-radius: 10px;
       margin-bottom: 30px;
@@ -106,7 +106,7 @@
     }
     
     .btn {
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #1a2a6c, #b21f1f);
       color: white;
       border: none;
       padding: 14px 28px;
@@ -124,7 +124,7 @@
     .btn:hover {
       transform: translateY(-3px);
       box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #1a2a6c, #8a1c1c);
     }
     
     .btn i {
@@ -235,7 +235,7 @@
     
     .download-btn {
       margin-top: 25px;
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #1a2a6c, #b21f1f);
       width: 100%;
     }
     
@@ -269,11 +269,11 @@
     }
     
     .notification.success {
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #4caf50, #2e7d32);
     }
     
     .notification.error {
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #f44336, #c62828);
     }
     
     .hidden {
@@ -298,7 +298,7 @@
     }
     
     .logout-btn {
-      background: linear-gradient(to right, #000, #000);
+      background: linear-gradient(to right, #1a2a6c, #b21f1f);
       padding: 10px 20px;
     }
     
@@ -415,6 +415,20 @@
       color: #1a2a6c;
       font-size: 1.1rem;
     }
+    
+    .client-form {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .client-form input {
+      flex: 1;
+    }
+    
+    .client-form button {
+      flex-shrink: 0;
+    }
   </style>
 
   <!-- Firebase SDK -->
@@ -468,24 +482,25 @@
         </button>
       </div>
 
-      <!-- Área de Clientes -->
+      <!-- Área de Propostas -->
       <div class="card">
-        <h2><i class="fas fa-users"></i> Clientes</h2>
-        <div class="form-group" style="display: flex; gap: 15px; align-items: center;">
-          <input type="text" id="client-name" placeholder="Nome do cliente" style="flex:1;" />
-          <button id="add-client-btn" class="btn" style="flex-shrink: 0;">
+        <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
+        
+        <!-- Formulário de cliente integrado -->
+        <div class="client-form">
+          <input type="text" id="client-name" placeholder="Nome do cliente" />
+          <button id="add-client-btn" class="btn">
             <i class="fas fa-user-plus"></i> Cadastrar Cliente
           </button>
         </div>
         
-        <div id="clients-list">
-          <!-- Clientes serão carregados aqui -->
+        <div class="form-group">
+          <label for="clients-select">Selecione o Cliente</label>
+          <select id="clients-select">
+            <option value="">Selecione um cliente</option>
+          </select>
         </div>
-      </div>
-
-      <!-- Área de Propostas -->
-      <div class="card">
-        <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
+        
         <div class="form-group">
           <label for="proposal-title">Título da Proposta</label>
           <input type="text" id="proposal-title" placeholder="Digite o título da proposta" />
@@ -501,13 +516,6 @@
             <option value="aprovacao">🟠 Em aprovação do cliente</option>
             <option value="aprovado">🟢 Aprovado</option>
             <option value="cancelado">🔴 Cancelado</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="clients-select">Selecione o Cliente</label>
-          <select id="clients-select" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 1.05rem; margin-bottom: 20px;">
-            <option value="">Selecione um cliente</option>
           </select>
         </div>
         
@@ -535,6 +543,7 @@
             <tr>
               <th>Título</th>
               <th>Status</th>
+              <th>Cliente</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -597,7 +606,6 @@
     const clientNameInput = document.getElementById('client-name');
     const addClientBtn = document.getElementById('add-client-btn');
     const clientsSelect = document.getElementById('clients-select');
-    const clientsList = document.getElementById('clients-list');
 
     // Elementos Propostas
     const proposalTitleInput = document.getElementById('proposal-title');
@@ -689,7 +697,6 @@
         proposals = [];
         clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
         proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
-        clientsList.innerHTML = '';
         proposalsList.innerHTML = '';
         markdownOutput.textContent = '';
         currentProposalId = null;
@@ -729,10 +736,8 @@
           clients = [];
           clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
           proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
-          clientsList.innerHTML = '';
 
           if (snapshot.empty) {
-            clientsList.innerHTML = '<p>Nenhum cliente cadastrado ainda.</p>';
             return;
           }
 
@@ -751,17 +756,6 @@
             filterOption.value = client.docId;
             filterOption.textContent = client.name;
             proposalFilter.appendChild(filterOption);
-
-            // Adicionar à lista de clientes
-            const clientCard = document.createElement('div');
-            clientCard.className = 'client-card';
-            clientCard.innerHTML = `
-              <span class="client-name">${client.name}</span>
-              <button class="action-btn delete-btn" onclick="deleteClient('${client.docId}')">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            `;
-            clientsList.appendChild(clientCard);
           });
         })
         .catch(error => {
@@ -792,30 +786,6 @@
           setLoading(addClientBtn, false, '<i class="fas fa-user-plus"></i> Cadastrar Cliente');
         });
     });
-
-    window.deleteClient = function(docId) {
-      if (!confirm('Tem certeza que deseja excluir este cliente? Todas as propostas associadas também serão excluídas.')) return;
-      
-      db.collection('clientes').doc(docId).delete()
-        .then(() => {
-          showNotification('Cliente excluído com sucesso!');
-          // Excluir todas as propostas associadas a este cliente
-          const batch = db.batch();
-          proposals.filter(p => p.clientId === docId).forEach(p => {
-            const propRef = db.collection('propostas').doc(p.docId);
-            batch.delete(propRef);
-          });
-          
-          return batch.commit();
-        })
-        .then(() => {
-          loadClients();
-          loadProposals();
-        })
-        .catch(error => {
-          showNotification('Erro ao excluir cliente: ' + error.message, false);
-        });
-    }
 
     // --- PROPOSTAS ---
 
@@ -889,7 +859,7 @@
         proposalsList.innerHTML = '';
 
         if (querySnapshot.empty) {
-          proposalsList.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 30px;">
+          proposalsList.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 30px;">
           <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
           <p>Nenhuma proposta cadastrada ainda.</p></td></tr>`;
           markdownOutput.textContent = '## Nenhuma proposta cadastrada';
@@ -911,7 +881,7 @@
       proposalsList.innerHTML = '';
 
       if(proposals.length === 0){
-        proposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta cadastrada.</td></tr>`;
+        proposalsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px;">Nenhuma proposta cadastrada.</td></tr>`;
         return;
       }
 
@@ -921,47 +891,26 @@
         filteredProposals = proposals.filter(p => p.clientId === currentFilter);
       }
 
-      // Agrupar propostas por cliente
-      const groupedByClient = filteredProposals.reduce((acc, proposal) => {
-        if (!acc[proposal.clientId]) {
-          acc[proposal.clientId] = {
-            clientName: proposal.clientName,
-            proposals: []
-          };
+      filteredProposals.forEach(proposal => {
+        let statusClass = '', statusText = '';
+        switch(proposal.status) {
+          case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
+          case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
+          case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
+          case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
         }
-        acc[proposal.clientId].proposals.push(proposal);
-        return acc;
-      }, {});
 
-      // Exibir agrupado
-      for (const clientId in groupedByClient) {
-        const group = groupedByClient[clientId];
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${proposal.title}</td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td>${proposal.clientName || 'Sem cliente'}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="editProposalByDocId('${proposal.docId}')"><i class="fas fa-edit"></i></button>
+            <button class="action-btn delete-btn" onclick="deleteProposalByDocId('${proposal.docId}')"><i class="fas fa-trash-alt"></i></button>
+          </td>`;
 
-        const clientRow = document.createElement('tr');
-        clientRow.innerHTML = `<td colspan="3" style="background: #1a2a6c; color: white; font-weight: bold; padding: 15px;">
-          <i class="fas fa-user"></i> Cliente: ${group.clientName}</td>`;
-        proposalsList.appendChild(clientRow);
-
-        group.proposals.forEach(proposal => {
-          let statusClass = '', statusText = '';
-          switch(proposal.status) {
-            case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
-            case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
-            case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
-            case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
-          }
-
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${proposal.title}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td>
-              <button class="action-btn edit-btn" onclick="editProposalByDocId('${proposal.docId}')"><i class="fas fa-edit"></i></button>
-              <button class="action-btn delete-btn" onclick="deleteProposalByDocId('${proposal.docId}')"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
-
-          proposalsList.appendChild(row);
-        });
-      }
+        proposalsList.appendChild(row);
+      });
     }
 
     function generateMarkdown() {
@@ -976,17 +925,6 @@
         filteredProposals = proposals.filter(p => p.clientId === currentFilter);
       }
 
-      const groupedByClient = filteredProposals.reduce((acc, p) => {
-        if (!acc[p.clientId]) {
-          acc[p.clientId] = {
-            clientName: p.clientName,
-            proposals: []
-          };
-        }
-        acc[p.clientId].proposals.push(p);
-        return acc;
-      }, {});
-
       let markdown = '';
       
       if (currentFilter === "all") {
@@ -996,27 +934,18 @@
         markdown += `## Lista de Propostas para: ${client ? client.name : 'Cliente Selecionado'}\n\n`;
       }
 
-      for (const clientId in groupedByClient) {
-        const group = groupedByClient[clientId];
-        
-        if (currentFilter === "all") {
-          markdown += `### Cliente: ${group.clientName}\n\n`;
-        }
-        
-        markdown += '| Título | Status | Link |\n|--------|--------|------|\n';
+      markdown += '| Título | Status | Cliente | Link |\n';
+      markdown += '|--------|--------|---------|------|\n';
 
-        group.proposals.forEach(p => {
-          const statusMap = {
-            'elaboracao': 'Em elaboração',
-            'aprovacao': 'Em aprovação do cliente',
-            'aprovado': 'Aprovado',
-            'cancelado': 'Cancelado'
-          };
-          markdown += `| ${p.title} | ${statusMap[p.status]} | [Link](${p.link || '#'}) |\n`;
-        });
-
-        markdown += '\n';
-      }
+      filteredProposals.forEach(p => {
+        const statusMap = {
+          'elaboracao': 'Em elaboração',
+          'aprovacao': 'Em aprovação do cliente',
+          'aprovado': 'Aprovado',
+          'cancelado': 'Cancelado'
+        };
+        markdown += `| ${p.title} | ${statusMap[p.status]} | ${p.clientName || '-'} | [Link](${p.link || '#'}) |\n`;
+      });
 
       markdownOutput.textContent = markdown;
     }
