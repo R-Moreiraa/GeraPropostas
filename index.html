@@ -593,7 +593,16 @@
 
     // Elementos de login
     const loginForm = document.getElementById('login-form');
-    // Variáveis de cadastro removidas
+    const registerForm = document.getElementById('register-form');
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginBtn = document.getElementById('login-btn');
+    const registerEmailInput = document.getElementById('register-email');
+    const registerPasswordInput = document.getElementById('register-password');
+    const confirmPasswordInput = document.getElementById('confirm-password');
+    const registerBtn = document.getElementById('register-btn');
+    const showRegisterLink = document.getElementById('show-register');
+    const showLoginLink = document.getElementById('show-login');
     const logoutBtn = document.getElementById('logout-btn');
     const notification = document.getElementById('notification');
 
@@ -627,8 +636,8 @@
     }
 
     // Alternar entre login e cadastro
-    // Listeners de troca entre login/cadastro removidos
-      loginForm.classList.remove('hidden');
+    // Alternância entre login e cadastro removida
+loginForm.classList.remove('hidden');
     });
 
     // Login com email/senha
@@ -671,7 +680,7 @@
     });
 
     // Cadastro de novo usuário
-    // Lógica de cadastro removida
+    // Listener de cadastro removido
 });
 
     logoutBtn.addEventListener('click', () => {
