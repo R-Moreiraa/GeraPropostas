@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gerador de Propostas com Firebase - Login por Telefone</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
- <style>
+  <style>
         * {
             margin: 0;
             padding: 0;
@@ -42,7 +42,7 @@
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-			color: #000;
+            color: #000;
         }
         
         h2 {
@@ -62,8 +62,7 @@
         
         .form-group {
             margin-bottom: 20px;
-			color: #000;
-			
+            color: #000;
         }
         
         label {
@@ -223,6 +222,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             transform: translateX(200%);
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         
         .notification.show {
@@ -235,6 +235,10 @@
         
         .notification.error {
             background: linear-gradient(to right, #f44336, #b71c1c);
+        }
+        
+        .hidden {
+            display: none;
         }
         
         @media (max-width: 768px) {
@@ -254,7 +258,7 @@
                 padding: 10px;
             }
         }
-    </style>
+  </style>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -264,8 +268,8 @@
 <body>
   <div class="container">
     <header>
-<h1><font color="white">Gerador de Propostas </h1></font>
-     <font color="white"> <p style="text-align: center;">Gerencie suas propostas e gere relatórios em Markdown</font></p>
+      <h1><font color="white">Gerador de Propostas </font></h1>
+      <font color="white"><p style="text-align: center;">Gerencie suas propostas e gere relatórios em Markdown</p></font>
     </header>
 
     <!-- Tela de login -->
@@ -292,15 +296,29 @@
 
     <!-- Conteúdo do app que só aparece quando usuário está logado -->
     <div id="app-section" class="hidden">
+
       <button id="logout-btn" class="btn" style="float: right; margin-bottom: 10px;">Logout</button>
 
-      <!-- Aqui vai o seu conteúdo existente (form de proposta, lista, etc) -->
-      <!-- Você pode copiar/colar seu conteúdo que estava dentro do .container, só que agora dentro dessa div -->
+      <!-- Área de Clientes -->
+      <div class="card">
+        <h2><i class="fas fa-users"></i> Clientes</h2>
+        <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="client-name" placeholder="Nome do cliente" style="flex:1;" />
+          <button id="add-client-btn" class="btn" style="flex-shrink: 0;">
+            <i class="fas fa-user-plus"></i> Cadastrar Cliente
+          </button>
+        </div>
+        <label for="clients-select" style="margin-top: 15px; font-weight: bold; color: #1a2a6c;">Clientes</label>
+        <select id="clients-select" style="width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #ddd; font-size: 1rem; margin-bottom: 20px;">
+          <option value="">Selecione um cliente</option>
+        </select>
+      </div>
 
+      <!-- Área de Propostas -->
       <div class="card">
         <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
         <div class="form-group">
-          <label for="proposal-title"><font color="#000">Título da Proposta </font> </label>
+          <label for="proposal-title"><font color="#000">Título da Proposta</font></label>
           <input type="text" id="proposal-title" placeholder="Digite o título da proposta" />
         </div>
         <div class="form-group">
@@ -310,10 +328,10 @@
         <div class="form-group">
           <label for="proposal-status"><font color="#000">Status da Proposta</font></label>
           <select id="proposal-status">
-            <option value="elaboracao">🟡Em elaboração</option>
-            <option value="aprovacao">🟠Em aprovação do cliente</option>
-            <option value="aprovado">🟢Aprovado</option>
-            <option value="cancelado">🔴Cancelado</option>
+            <option value="elaboracao">🟡 Em elaboração</option>
+            <option value="aprovacao">🟠 Em aprovação do cliente</option>
+            <option value="aprovado">🟢 Aprovado</option>
+            <option value="cancelado">🔴 Cancelado</option>
           </select>
         </div>
         <button id="add-proposal" class="btn">
@@ -345,11 +363,11 @@
       </div>
     </div>
 
-    <div id="notification"></div>
+    <div id="notification" class="notification"></div>
   </div>
 
   <script>
-    // Configuração Firebase (já adaptada)
+    // Configuração Firebase (adaptada)
     const firebaseConfig = {
       apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg",
       authDomain: "gera-propostas.firebaseapp.com",
@@ -364,9 +382,10 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Elementos
+    // Elementos do DOM
     const loginSection = document.getElementById('login-section');
     const appSection = document.getElementById('app-section');
+
     const phoneNumberInput = document.getElementById('phone-number');
     const sendCodeBtn = document.getElementById('send-code-btn');
     const verificationCodeSection = document.getElementById('verification-code-section');
@@ -375,136 +394,12 @@
     const logoutBtn = document.getElementById('logout-btn');
     const notification = document.getElementById('notification');
 
-    function showNotification(message, isSuccess = true) {
-      notification.textContent = message;
-      notification.className = isSuccess ? 'success' : 'error';
-      notification.style.display = 'block';
-      notification.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336';
-      setTimeout(() => notification.style.display = 'none', 3000);
-    }
+    // Elementos Clientes
+    const clientNameInput = document.getElementById('client-name');
+    const addClientBtn = document.getElementById('add-client-btn');
+    const clientsSelect = document.getElementById('clients-select');
 
-    // Inicializa o recaptcha invisível
-    let recaptchaVerifier;
-window.onload = () => {
-  recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-    size: 'invisible',
-  });
-  recaptchaVerifier.render();
-
-  sendCodeBtn.addEventListener('click', () => {
-    const phoneNumber = phoneNumberInput.value.trim();
-    if (!phoneNumber) {
-      showNotification('Por favor, insira um número de telefone válido!', false);
-      return;
-    }
-    sendCodeBtn.disabled = true;
-    auth.signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
-      .then((result) => {
-        confirmationResult = result;
-        showNotification('Código enviado! Verifique seu celular.');
-        verificationCodeSection.classList.remove('hidden');
-      })
-      .catch((error) => {
-        console.error(error);
-        showNotification('Erro ao enviar código: ' + error.message, false);
-      })
-      .finally(() => {
-        sendCodeBtn.disabled = false;
-      });
-  });
-
-  verifyCodeBtn.addEventListener('click', () => {
-    const code = verificationCodeInput.value.trim();
-    if (!code) {
-      showNotification('Por favor, insira o código de verificação!', false);
-      return;
-    }
-    verifyCodeBtn.disabled = true;
-    confirmationResult.confirm(code)
-      .then((result) => {
-        const user = result.user;
-        showNotification(`Bem-vindo, usuário ${user.phoneNumber}!`);
-        loginSection.classList.add('hidden');
-        appSection.classList.remove('hidden');
-        loadProposals();
-      })
-      .catch((error) => {
-        console.error(error);
-        showNotification('Código inválido ou expirado.', false);
-      })
-      .finally(() => {
-        verifyCodeBtn.disabled = false;
-      });
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    logoutBtn.disabled = true;
-    auth.signOut().then(() => {
-      showNotification('Desconectado com sucesso.');
-      loginSection.classList.remove('hidden');
-      appSection.classList.add('hidden');
-    }).finally(() => {
-      logoutBtn.disabled = false;
-    });
-  });
-
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loginSection.classList.add('hidden');
-      appSection.classList.remove('hidden');
-      loadProposals();
-    } else {
-      loginSection.classList.remove('hidden');
-      appSection.classList.add('hidden');
-    }
-  });
-};
-
-
-    verifyCodeBtn.addEventListener('click', () => {
-      const code = verificationCodeInput.value.trim();
-      if (!code) {
-        showNotification('Por favor, insira o código de verificação!', false);
-        return;
-      }
-
-      confirmationResult.confirm(code)
-        .then((result) => {
-          const user = result.user;
-          showNotification(`Bem-vindo, usuário ${user.phoneNumber}!`);
-          loginSection.classList.add('hidden');
-          appSection.classList.remove('hidden');
-          loadProposals();
-        })
-        .catch((error) => {
-          console.error(error);
-          showNotification('Código inválido ou expirado.', false);
-        });
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      auth.signOut().then(() => {
-        showNotification('Desconectado com sucesso.');
-        loginSection.classList.remove('hidden');
-        appSection.classList.add('hidden');
-      });
-    });
-
-    // Escuta mudança de estado de autenticação (ex.: recarregar página)
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        loginSection.classList.add('hidden');
-        appSection.classList.remove('hidden');
-        loadProposals();
-      } else {
-        loginSection.classList.remove('hidden');
-        appSection.classList.add('hidden');
-      }
-    });
-
-    // Seu código atual para propostas, adaptado para usar somente quando usuário logado
-
-    // Elementos para propostas
+    // Elementos Propostas
     const proposalTitleInput = document.getElementById('proposal-title');
     const proposalLinkInput = document.getElementById('proposal-link');
     const proposalStatusSelect = document.getElementById('proposal-status');
@@ -512,10 +407,181 @@ window.onload = () => {
     const proposalsList = document.getElementById('proposals-list');
     const markdownOutput = document.getElementById('markdown-output');
 
+    // Variáveis
+    let confirmationResult;
+    let clients = [];
     let proposals = [];
 
+    function showNotification(message, isSuccess = true) {
+      notification.textContent = message;
+      notification.className = 'notification ' + (isSuccess ? 'success' : 'error') + ' show';
+      setTimeout(() => notification.classList.remove('show'), 3000);
+    }
+
+    // Inicializa o recaptcha invisível
+    let recaptchaVerifier;
+    window.onload = () => {
+      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+      });
+      recaptchaVerifier.render();
+
+      sendCodeBtn.addEventListener('click', () => {
+        const phoneNumber = phoneNumberInput.value.trim();
+        if (!phoneNumber) {
+          showNotification('Por favor, insira um número de telefone válido!', false);
+          return;
+        }
+        sendCodeBtn.disabled = true;
+        auth.signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
+          .then((result) => {
+            confirmationResult = result;
+            showNotification('Código enviado! Verifique seu celular.');
+            verificationCodeSection.classList.remove('hidden');
+          })
+          .catch((error) => {
+            console.error(error);
+            showNotification('Erro ao enviar código: ' + error.message, false);
+          })
+          .finally(() => {
+            sendCodeBtn.disabled = false;
+          });
+      });
+
+      verifyCodeBtn.addEventListener('click', () => {
+        const code = verificationCodeInput.value.trim();
+        if (!code) {
+          showNotification('Por favor, insira o código de verificação!', false);
+          return;
+        }
+        verifyCodeBtn.disabled = true;
+        confirmationResult.confirm(code)
+          .then((result) => {
+            const user = result.user;
+            showNotification(`Bem-vindo, usuário ${user.phoneNumber}!`);
+            loginSection.classList.add('hidden');
+            appSection.classList.remove('hidden');
+            loadClients();
+            loadProposals();
+          })
+          .catch((error) => {
+            console.error(error);
+            showNotification('Código inválido ou expirado.', false);
+          })
+          .finally(() => {
+            verifyCodeBtn.disabled = false;
+          });
+      });
+
+      logoutBtn.addEventListener('click', () => {
+        logoutBtn.disabled = true;
+        auth.signOut().then(() => {
+          showNotification('Desconectado com sucesso.');
+          loginSection.classList.remove('hidden');
+          appSection.classList.add('hidden');
+        }).finally(() => {
+          logoutBtn.disabled = false;
+        });
+      });
+
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          loginSection.classList.add('hidden');
+          appSection.classList.remove('hidden');
+          loadClients();
+          loadProposals();
+        } else {
+          loginSection.classList.remove('hidden');
+          appSection.classList.add('hidden');
+        }
+      });
+    };
+
+    // --- CLIENTES ---
+
+    function loadClients() {
+      const user = auth.currentUser;
+      if (!user) {
+        clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+        clients = [];
+        return;
+      }
+
+      db.collection('clientes').orderBy('name').get()
+        .then(snapshot => {
+          clients = [];
+          clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+
+          if (snapshot.empty) {
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            const client = { ...doc.data(), docId: doc.id };
+            clients.push(client);
+
+            const option = document.createElement('option');
+            option.value = client.docId;
+            option.textContent = client.name;
+            clientsSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          showNotification('Erro ao carregar clientes: ' + error.message, false);
+        });
+    }
+
+    addClientBtn.addEventListener('click', () => {
+      const name = clientNameInput.value.trim();
+      if (!name) {
+        showNotification('Por favor, insira o nome do cliente!', false);
+        return;
+      }
+
+      db.collection('clientes').add({ name })
+        .then(() => {
+          showNotification('Cliente cadastrado com sucesso!');
+          clientNameInput.value = '';
+          loadClients();
+        })
+        .catch(() => {
+          showNotification('Erro ao cadastrar cliente!', false);
+        });
+    });
+
+    // --- PROPOSTAS ---
+
+    addProposalBtn.addEventListener('click', () => {
+      const title = proposalTitleInput.value.trim();
+      const link = proposalLinkInput.value.trim();
+      const status = proposalStatusSelect.value;
+      const clientId = clientsSelect.value;
+
+      if (!clientId) return showNotification('Por favor, selecione um cliente!', false);
+      if (!title) return showNotification('Por favor, insira um título para a proposta!', false);
+
+      const client = clients.find(c => c.docId === clientId);
+      if (!client) return showNotification('Cliente inválido!', false);
+
+      const newProposal = {
+        id: Date.now(),
+        title,
+        link,
+        status,
+        clientId,
+        clientName: client.name
+      };
+
+      db.collection('propostas').add(newProposal).then(() => {
+        showNotification('Proposta adicionada com sucesso!');
+        proposalTitleInput.value = '';
+        proposalLinkInput.value = '';
+        proposalStatusSelect.value = 'elaboracao';
+        loadProposals();
+      }).catch(() => showNotification('Erro ao adicionar proposta!', false));
+    });
+
     function loadProposals() {
-      // Para garantir que só usuários autenticados façam leitura
       const user = auth.currentUser;
       if (!user) {
         proposalsList.innerHTML = '';
@@ -528,7 +594,9 @@ window.onload = () => {
         proposalsList.innerHTML = '';
 
         if (querySnapshot.empty) {
-          proposalsList.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 30px;"><i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i><p>Nenhuma proposta cadastrada ainda.</p></td></tr>`;
+          proposalsList.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 30px;">
+          <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
+          <p>Nenhuma proposta cadastrada ainda.</p></td></tr>`;
           markdownOutput.textContent = '## Nenhuma proposta cadastrada';
           return;
         }
@@ -546,96 +614,128 @@ window.onload = () => {
     function renderProposals() {
       proposalsList.innerHTML = '';
 
-      proposals.forEach((proposal, index) => {
-        let statusClass = '', statusText = '';
-        switch(proposal.status) {
-          case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
-          case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
-          case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
-          case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
+      if(proposals.length === 0){
+        proposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta cadastrada.</td></tr>`;
+        return;
+      }
+
+      // Agrupar propostas por cliente
+      const groupedByClient = proposals.reduce((acc, proposal) => {
+        if (!acc[proposal.clientId]) {
+          acc[proposal.clientId] = {
+            clientName: proposal.clientName,
+            proposals: []
+          };
         }
+        acc[proposal.clientId].proposals.push(proposal);
+        return acc;
+      }, {});
 
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${proposal.title}</td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td>
-          <button class="action-btn edit-btn" onclick="editProposal(${index})"><i class="fas fa-edit"></i></button>
-          <button class="action-btn delete-btn" onclick="deleteProposal(${index})"><i class="fas fa-trash-alt"></i></button>
-        </td>`;
+      // Exibir agrupado
+      for (const clientId in groupedByClient) {
+        const group = groupedByClient[clientId];
 
-        proposalsList.appendChild(row);
-      });
+        const clientRow = document.createElement('tr');
+        clientRow.innerHTML = `<td colspan="3" style="background: #1a2a6c; color: white; font-weight: bold; padding: 10px;">
+          Cliente: ${group.clientName}</td>`;
+        proposalsList.appendChild(clientRow);
+
+        group.proposals.forEach(proposal => {
+          let statusClass = '', statusText = '';
+          switch(proposal.status) {
+            case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
+            case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
+            case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
+            case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
+          }
+
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${proposal.title}</td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td>
+            <button class="action-btn edit-btn" onclick="editProposalByDocId('${proposal.docId}')"><i class="fas fa-edit"></i></button>
+            <button class="action-btn delete-btn" onclick="deleteProposalByDocId('${proposal.docId}')"><i class="fas fa-trash-alt"></i></button>
+          </td>`;
+
+          proposalsList.appendChild(row);
+        });
+      }
 
       generateMarkdown();
     }
 
-    addProposalBtn.addEventListener('click', () => {
-      const title = proposalTitleInput.value.trim();
-      const link = proposalLinkInput.value.trim();
-      const status = proposalStatusSelect.value;
+    function editProposalByDocId(docId) {
+      const proposal = proposals.find(p => p.docId === docId);
+      if (!proposal) return;
 
-      if (!title) return showNotification('Por favor, insira um título para a proposta!', false);
-
-      const newProposal = { id: Date.now(), title, link, status };
-
-      db.collection('propostas').add(newProposal).then(() => {
-        showNotification('Proposta adicionada com sucesso!');
-        proposalTitleInput.value = '';
-        proposalLinkInput.value = '';
-        proposalStatusSelect.value = 'elaboracao';
-        loadProposals();
-      }).catch(() => showNotification('Erro ao adicionar proposta!', false));
-    });
-
-    function editProposal(index) {
-      const proposal = proposals[index];
       proposalTitleInput.value = proposal.title;
       proposalLinkInput.value = proposal.link;
       proposalStatusSelect.value = proposal.status;
+      clientsSelect.value = proposal.clientId || '';
 
-      db.collection('propostas').doc(proposal.docId).delete().then(() => {
-        showNotification('Proposta carregada para edição!');
-        loadProposals();
-      });
+      // Apagar proposta para substituir na edição
+      db.collection('propostas').doc(docId).delete()
+        .then(() => {
+          showNotification('Proposta carregada para edição!');
+          loadProposals();
+        });
     }
 
-    function deleteProposal(index) {
-      const proposal = proposals[index];
-      if (confirm('Tem certeza que deseja excluir esta proposta?')) {
-        db.collection('propostas').doc(proposal.docId).delete().then(() => {
+    function deleteProposalByDocId(docId) {
+      if (!confirm('Tem certeza que deseja excluir esta proposta?')) return;
+
+      db.collection('propostas').doc(docId).delete()
+        .then(() => {
           showNotification('Proposta excluída com sucesso!');
           loadProposals();
         });
-      }
     }
 
     function generateMarkdown() {
       if (proposals.length === 0) return markdownOutput.textContent = '## Nenhuma proposta cadastrada';
-      let markdown = '## Lista de Propostas\n\n| Título | Status | Link |\n|--------|--------|------|\n';
-      proposals.forEach(p => {
-        const statusMap = {
-          'elaboracao': 'Em elaboração',
-          'aprovacao': 'Em aprovação do cliente',
-          'aprovado': 'Aprovado',
-          'cancelado': 'Cancelado'
-        };
-        markdown += `| ${p.title} | ${statusMap[p.status]} | [Link](${p.link}) |\n`;
-      });
+
+      const groupedByClient = proposals.reduce((acc, p) => {
+        if (!acc[p.clientId]) {
+          acc[p.clientId] = {
+            clientName: p.clientName,
+            proposals: []
+          };
+        }
+        acc[p.clientId].proposals.push(p);
+        return acc;
+      }, {});
+
+      let markdown = '## Lista de Propostas\n\n';
+
+      for (const clientId in groupedByClient) {
+        const group = groupedByClient[clientId];
+        markdown += `### Cliente: ${group.clientName}\n\n`;
+        markdown += '| Título | Status | Link |\n|--------|--------|------|\n';
+
+        group.proposals.forEach(p => {
+          const statusMap = {
+            'elaboracao': 'Em elaboração',
+            'aprovacao': 'Em aprovação do cliente',
+            'aprovado': 'Aprovado',
+            'cancelado': 'Cancelado'
+          };
+          markdown += `| ${p.title} | ${statusMap[p.status]} | [Link](${p.link}) |\n`;
+        });
+
+        markdown += '\n';
+      }
+
       markdownOutput.textContent = markdown;
     }
 
     // Download markdown
-    const downloadBtn = document.getElementById('download-md');
-    downloadBtn.addEventListener('click', () => {
-      if (proposals.length === 0) return showNotification('Não há propostas para exportar!', false);
-      const blob = new Blob([markdownOutput.textContent], { type: 'text/markdown' });
+    document.getElementById('download-md').addEventListener('click', () => {
+      const markdown = markdownOutput.textContent;
+      const blob = new Blob([markdown], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = 'propostas.md';
-      document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showNotification('Markdown baixado com sucesso!');
     });
   </script>
 </body>
