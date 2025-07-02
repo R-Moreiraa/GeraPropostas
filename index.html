@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador de Propostas com Firebase</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <<style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerador de Propostas com Firebase - Login por Telefone</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+ <<style>
         * {
             margin: 0;
             padding: 0;
@@ -256,10 +256,100 @@
         }
     </style>
 
-  <!-- Firebase -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
+      <p>Gerencie suas propostas e gere relatórios em Markdown</p>
+    </header>
+
+    <!-- Tela de login -->
+    <div id="login-section">
+      <h2>Login / Cadastro por Telefone</h2>
+
+      <div class="form-group">
+        <label for="phone-number">Número de telefone (+55 11 99999-9999)</label>
+        <input type="text" id="phone-number" placeholder="+55 11 99999-9999" />
+      </div>
+
+      <div id="recaptcha-container"></div>
+
+      <button id="send-code-btn" class="btn"><i class="fas fa-paper-plane"></i> Enviar Código</button>
+
+      <div id="verification-code-section" class="hidden">
+        <div class="form-group">
+          <label for="verification-code">Código de Verificação</label>
+          <input type="text" id="verification-code" placeholder="Digite o código recebido" />
+        </div>
+        <button id="verify-code-btn" class="btn"><i class="fas fa-check"></i> Verificar Código</button>
+      </div>
+    </div>
+
+    <!-- Conteúdo do app que só aparece quando usuário está logado -->
+    <div id="app-section" class="hidden">
+      <button id="logout-btn" class="btn" style="float: right; margin-bottom: 10px;">Logout</button>
+
+      <!-- Aqui vai o seu conteúdo existente (form de proposta, lista, etc) -->
+      <!-- Você pode copiar/colar seu conteúdo que estava dentro do .container, só que agora dentro dessa div -->
+
+      <div class="card">
+        <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
+        <div class="form-group">
+          <label for="proposal-title">Título da Proposta</label>
+          <input type="text" id="proposal-title" placeholder="Digite o título da proposta" />
+        </div>
+        <div class="form-group">
+          <label for="proposal-link">Link da Proposta</label>
+          <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta" />
+        </div>
+        <div class="form-group">
+          <label for="proposal-status">Status da Proposta</label>
+          <select id="proposal-status">
+            <option value="elaboracao">🟡Em elaboração</option>
+            <option value="aprovacao">🟠Em aprovação do cliente</option>
+            <option value="aprovado">🟢Aprovado</option>
+            <option value="cancelado">🔴Cancelado</option>
+          </select>
+        </div>
+        <button id="add-proposal" class="btn">
+          <i class="fas fa-save"></i> Salvar Proposta
+        </button>
+      </div>
+
+      <div class="card">
+        <h2><i class="fas fa-list"></i> Lista de Propostas</h2>
+        <table class="proposal-list">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="proposals-list"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2><i class="fab fa-markdown"></i> Tabela Markdown Gerada</h2>
+        <p>Esta tabela será atualizada automaticamente conforme as propostas são adicionadas ou editadas.</p>
+        <div class="markdown-container" id="markdown-output"></div>
+        <button id="download-md" class="btn download-btn">
+          <i class="fas fa-download"></i> Baixar Markdown
+        </button>
+      </div>
+    </div>
+
+    <div id="notification"></div>
+  </div>
+
   <script>
+    // Configuração Firebase (já adaptada)
     const firebaseConfig = {
       apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg",
       authDomain: "gera-propostas.firebaseapp.com",
@@ -269,161 +359,125 @@
       appId: "1:517918747792:web:568b86b22e0e5709823c15",
       measurementId: "G-CJCK09C7D8"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-  </script>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
-      <p>Gerencie suas propostas e gere relatórios em Markdown</p>
-    </header>
+    const auth = firebase.auth();
 
-    <div class="card">
-      <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
-      <div class="form-group">
-        <label for="proposal-title">Título da Proposta</label>
-        <input type="text" id="proposal-title" placeholder="Digite o título da proposta">
-      </div>
-      <div class="form-group">
-        <label for="proposal-link">Link da Proposta</label>
-        <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta">
-      </div>
-      <div class="form-group">
-        <label for="proposal-status">Status da Proposta</label>
-        <select id="proposal-status">
-          <option value="elaboracao">🟡Em elaboração</option>
-          <option value="aprovacao">🟠Em aprovação do cliente</option>
-          <option value="aprovado">🟢Aprovado</option>
-          <option value="cancelado">🔴Cancelado</option>
-        </select>
-      </div>
-      <button id="add-proposal" class="btn">
-        <i class="fas fa-save"></i> Salvar Proposta
-      </button>
-    </div>
+    // Elementos
+    const loginSection = document.getElementById('login-section');
+    const appSection = document.getElementById('app-section');
+    const phoneNumberInput = document.getElementById('phone-number');
+    const sendCodeBtn = document.getElementById('send-code-btn');
+    const verificationCodeSection = document.getElementById('verification-code-section');
+    const verificationCodeInput = document.getElementById('verification-code');
+    const verifyCodeBtn = document.getElementById('verify-code-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const notification = document.getElementById('notification');
 
-    <div class="card">
-      <h2><i class="fas fa-list"></i> Lista de Propostas</h2>
-      <table class="proposal-list">
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="proposals-list"></tbody>
-      </table>
-    </div>
+    function showNotification(message, isSuccess = true) {
+      notification.textContent = message;
+      notification.className = isSuccess ? 'success' : 'error';
+      notification.style.display = 'block';
+      notification.style.backgroundColor = isSuccess ? '#4caf50' : '#f44336';
+      setTimeout(() => notification.style.display = 'none', 3000);
+    }
 
-    <div class="card">
-      <h2><i class="fab fa-markdown"></i> Tabela Markdown Gerada</h2>
-      <p>Esta tabela será atualizada automaticamente conforme as propostas são adicionadas ou editadas.</p>
-      <div class="markdown-container" id="markdown-output"></div>
-      <button id="download-md" class="btn download-btn">
-        <i class="fas fa-download"></i> Baixar Markdown
-      </button>
-    </div>
-  </div>
-
-  <footer>Developed by Rodrigo Moreira</footer>
-  <div class="notification" id="notification"></div>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg",
-      authDomain: "gera-propostas.firebaseapp.com",
-      projectId: "gera-propostas",
-      storageBucket: "gera-propostas.firebasestorage.app",
-      messagingSenderId: "517918747792",
-      appId: "1:517918747792:web:568b86b22e0e5709823c15",
-      measurementId: "G-CJCK09C7D8"
+    // Inicializa o recaptcha invisível
+    let recaptchaVerifier;
+    window.onload = () => {
+      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          // reCAPTCHA resolvido - pode prosseguir
+        }
+      });
+      recaptchaVerifier.render();
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-  </script>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
-      <p>Gerencie suas propostas e gere relatórios em Markdown</p>
-    </header>
 
-    <div class="card">
-      <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
-      <div class="form-group">
-        <label for="proposal-title">Título da Proposta</label>
-        <input type="text" id="proposal-title" placeholder="Digite o título da proposta">
-      </div>
-      <div class="form-group">
-        <label for="proposal-link">Link da Proposta</label>
-        <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta">
-      </div>
-      <div class="form-group">
-        <label for="proposal-status">Status da Proposta</label>
-        <select id="proposal-status">
-          <option value="elaboracao">🟡Em elaboração</option>
-          <option value="aprovacao">🟠Em aprovação do cliente</option>
-          <option value="aprovado">🟢Aprovado</option>
-          <option value="cancelado">🔴Cancelado</option>
-        </select>
-      </div>
-      <button id="add-proposal" class="btn">
-        <i class="fas fa-save"></i> Salvar Proposta
-      </button>
-    </div>
+    let confirmationResult;
 
-    <div class="card">
-      <h2><i class="fas fa-list"></i> Lista de Propostas</h2>
-      <table class="proposal-list">
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="proposals-list"></tbody>
-      </table>
-    </div>
+    sendCodeBtn.addEventListener('click', () => {
+      const phoneNumber = phoneNumberInput.value.trim();
+      if (!phoneNumber) {
+        showNotification('Por favor, insira um número de telefone válido!', false);
+        return;
+      }
 
-    <div class="card">
-      <h2><i class="fab fa-markdown"></i> Tabela Markdown Gerada</h2>
-      <p>Esta tabela será atualizada automaticamente conforme as propostas são adicionadas ou editadas.</p>
-      <div class="markdown-container" id="markdown-output"></div>
-      <button id="download-md" class="btn download-btn">
-        <i class="fas fa-download"></i> Baixar Markdown
-      </button>
-    </div>
-  </div>
+      auth.signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
+        .then((result) => {
+          confirmationResult = result;
+          showNotification('Código enviado! Verifique seu celular.');
+          verificationCodeSection.classList.remove('hidden');
+        })
+        .catch((error) => {
+          console.error(error);
+          showNotification('Erro ao enviar código: ' + error.message, false);
+        });
+    });
 
-  <footer>Developed by Rodrigo Moreira</footer>
-  <div class="notification" id="notification"></div>
+    verifyCodeBtn.addEventListener('click', () => {
+      const code = verificationCodeInput.value.trim();
+      if (!code) {
+        showNotification('Por favor, insira o código de verificação!', false);
+        return;
+      }
 
-  <script>
-    let proposals = [];
+      confirmationResult.confirm(code)
+        .then((result) => {
+          const user = result.user;
+          showNotification(`Bem-vindo, usuário ${user.phoneNumber}!`);
+          loginSection.classList.add('hidden');
+          appSection.classList.remove('hidden');
+          loadProposals();
+        })
+        .catch((error) => {
+          console.error(error);
+          showNotification('Código inválido ou expirado.', false);
+        });
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        showNotification('Desconectado com sucesso.');
+        loginSection.classList.remove('hidden');
+        appSection.classList.add('hidden');
+      });
+    });
+
+    // Escuta mudança de estado de autenticação (ex.: recarregar página)
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginSection.classList.add('hidden');
+        appSection.classList.remove('hidden');
+        loadProposals();
+      } else {
+        loginSection.classList.remove('hidden');
+        appSection.classList.add('hidden');
+      }
+    });
+
+    // Seu código atual para propostas, adaptado para usar somente quando usuário logado
+
+    // Elementos para propostas
     const proposalTitleInput = document.getElementById('proposal-title');
     const proposalLinkInput = document.getElementById('proposal-link');
     const proposalStatusSelect = document.getElementById('proposal-status');
     const addProposalBtn = document.getElementById('add-proposal');
     const proposalsList = document.getElementById('proposals-list');
     const markdownOutput = document.getElementById('markdown-output');
-    const downloadBtn = document.getElementById('download-md');
-    const notification = document.getElementById('notification');
 
-    function showNotification(message, isSuccess = true) {
-      notification.textContent = message;
-      notification.className = isSuccess ? 'notification success show' : 'notification error show';
-      setTimeout(() => notification.classList.remove('show'), 3000);
-    }
+    let proposals = [];
 
     function loadProposals() {
+      // Para garantir que só usuários autenticados façam leitura
+      const user = auth.currentUser;
+      if (!user) {
+        proposalsList.innerHTML = '';
+        markdownOutput.textContent = '';
+        return;
+      }
+
       db.collection('propostas').orderBy('id', 'desc').get().then((querySnapshot) => {
         proposals = [];
         proposalsList.innerHTML = '';
@@ -439,6 +493,8 @@
         });
 
         renderProposals();
+      }).catch(error => {
+        showNotification('Erro ao carregar propostas: ' + error.message, false);
       });
     }
 
@@ -455,7 +511,10 @@
         }
 
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${proposal.title}</td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td><button class="action-btn edit-btn" onclick="editProposal(${index})"><i class="fas fa-edit"></i></button><button class="action-btn delete-btn" onclick="deleteProposal(${index})"><i class="fas fa-trash-alt"></i></button></td>`;
+        row.innerHTML = `<td>${proposal.title}</td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td>
+          <button class="action-btn edit-btn" onclick="editProposal(${index})"><i class="fas fa-edit"></i></button>
+          <button class="action-btn delete-btn" onclick="deleteProposal(${index})"><i class="fas fa-trash-alt"></i></button>
+        </td>`;
 
         proposalsList.appendChild(row);
       });
@@ -463,7 +522,7 @@
       generateMarkdown();
     }
 
-    function addProposal() {
+    addProposalBtn.addEventListener('click', () => {
       const title = proposalTitleInput.value.trim();
       const link = proposalLinkInput.value.trim();
       const status = proposalStatusSelect.value;
@@ -479,7 +538,7 @@
         proposalStatusSelect.value = 'elaboracao';
         loadProposals();
       }).catch(() => showNotification('Erro ao adicionar proposta!', false));
-    }
+    });
 
     function editProposal(index) {
       const proposal = proposals[index];
@@ -518,7 +577,9 @@
       markdownOutput.textContent = markdown;
     }
 
-    function downloadMarkdown() {
+    // Download markdown
+    const downloadBtn = document.getElementById('download-md');
+    downloadBtn.addEventListener('click', () => {
       if (proposals.length === 0) return showNotification('Não há propostas para exportar!', false);
       const blob = new Blob([markdownOutput.textContent], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
@@ -530,14 +591,7 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showNotification('Markdown baixado com sucesso!');
-    }
-
-    addProposalBtn.addEventListener('click', addProposal);
-    downloadBtn.addEventListener('click', downloadMarkdown);
-    document.addEventListener('DOMContentLoaded', loadProposals);
-    proposalTitleInput.addEventListener('keyup', (e) => e.key === 'Enter' && addProposal());
-    window.editProposal = editProposal;
-    window.deleteProposal = deleteProposal;
+    });
   </script>
 </body>
 </html>
