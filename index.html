@@ -3,418 +3,282 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gerador de Propostas - Login por Email</title>
+  <title>Gerador de Propostas com Firebase - Login por Telefone</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    body {
-      background: linear-gradient(to right, #000, #000);
-      color: #333;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-      background-color: white;
-      border-radius: 15px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-      overflow: hidden;
-      padding: 30px;
-    }
-    
-    header {
-      text-align: center;
-      padding: 25px 0;
-      background: linear-gradient(to right, #000, #000);
-      color: white;
-      border-radius: 10px;
-      margin-bottom: 30px;
-    }
-    
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      color: white;
-    }
-    
-    h2 {
-      color: #1a2a6c;
-      border-bottom: 2px solid #b21f1f;
-      padding-bottom: 12px;
-      margin: 25px 0 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    h2 i {
-      font-size: 1.8rem;
-    }
-    
-    .card {
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      padding: 30px;
-      margin-bottom: 35px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border: 1px solid #eee;
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-    }
-    
-    .form-group {
-      margin-bottom: 22px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #1a2a6c;
-      font-size: 1.05rem;
-    }
-    
-    input, select {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 1.05rem;
-      transition: all 0.3s ease;
-    }
-    
-    input:focus, select:focus {
-      border-color: #1a2a6c;
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.2);
-    }
-    
-    .btn {
-      background: linear-gradient(to right, #000, #000);
-      color: white;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-    
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
-      background: linear-gradient(to right, #000, #000);
-    }
-    
-    .btn i {
-      margin-right: 10px;
-    }
-    
-    .proposal-list {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 25px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    }
-    
-    .proposal-list th {
-      background: #1a2a6c;
-      color: white;
-      padding: 16px;
-      text-align: left;
-      font-weight: 600;
-    }
-    
-    .proposal-list td {
-      padding: 16px;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .proposal-list tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    
-    .proposal-list tr:hover {
-      background-color: #f0f5ff;
-    }
-    
-    .status-badge {
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      text-align: center;
-      display: inline-block;
-      min-width: 180px;
-    }
-    
-    .status-elaboracao {
-      background-color: #ffeb3b;
-      color: #000;
-    }
-    
-    .status-aprovacao {
-      background-color: #f1a10e;
-      color: #000;
-    }
-    
-    .status-aprovado {
-      background-color: #4caf50;
-      color: #000;
-    }
-    
-    .status-cancelado {
-      background-color: #f44336;
-      color: #000;
-    }
-    
-    .action-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.3rem;
-      margin: 0 6px;
-      transition: all 0.3s ease;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .edit-btn {
-      color: #1a2a6c;
-      background: rgba(26, 42, 108, 0.1);
-    }
-    
-    .delete-btn {
-      color: #b21f1f;
-      background: rgba(178, 31, 31, 0.1);
-    }
-    
-    .action-btn:hover {
-      transform: scale(1.15);
-      background: rgba(26, 42, 108, 0.2);
-    }
-    
-    .markdown-container {
-      background-color: #1a2a6c;
-      color: white;
-      border-radius: 10px;
-      padding: 25px;
-      margin-top: 25px;
-      border: 1px solid #dee2e6;
-      font-family: 'Courier New', monospace;
-      white-space: pre-wrap;
-      max-height: 350px;
-      overflow-y: auto;
-      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    .download-btn {
-      margin-top: 25px;
-      background: linear-gradient(to right, #000, #000);
-      width: 100%;
-    }
-    
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: #1a2a6c;
-      margin-top: 30px;
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-    
-    .notification {
-      position: fixed;
-      top: 25px;
-      right: 25px;
-      padding: 18px 30px;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      transform: translateX(200%);
-      transition: transform 0.4s ease;
-      z-index: 1000;
-      font-size: 1.1rem;
-      max-width: 400px;
-    }
-    
-    .notification.show {
-      transform: translateX(0);
-    }
-    
-    .notification.success {
-      background: linear-gradient(to right, #000, #000);
-    }
-    
-    .notification.error {
-      background: linear-gradient(to right, #000, #000);
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 25px;
-      padding: 15px 20px;
-      background: #f0f5ff;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
-    
-    .user-email {
-      font-weight: bold;
-      color: #1a2a6c;
-      font-size: 1.1rem;
-    }
-    
-    .logout-btn {
-      background: linear-gradient(to right, #000, #000);
-      padding: 10px 20px;
-    }
-    
-    .login-container {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 30px;
-    }
-    
-    .login-card {
-      background: white;
-      border-radius: 15px;
-      padding: 40px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-    }
-    
-    .login-title {
-      text-align: center;
-      margin-bottom: 30px;
-      color: #1a2a6c;
-    }
-    
-    .login-title i {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      display: block;
-      color: #1a2a6c;
-    }
-    
-    .auth-toggle {
-      text-align: center;
-      margin-top: 25px;
-      color: #666;
-    }
-    
-    .auth-toggle a {
-      color: #1a2a6c;
-      text-decoration: none;
-      font-weight: bold;
-      margin-left: 8px;
-      cursor: pointer;
-    }
-    
-    .auth-toggle a:hover {
-      text-decoration: underline;
-    }
-    
-    @media (max-width: 768px) {
-      .container {
-        padding: 20px;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .proposal-list {
-        font-size: 0.95rem;
-      }
-      
-      .proposal-list th, .proposal-list td {
-        padding: 12px;
-      }
-      
-      .user-info {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-      }
-      
-      .login-card {
-        padding: 30px 20px;
-      }
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: white;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: White;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: #000;
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        
+        h2 {
+            color: #000;
+            border-bottom: 2px solid #b21f1f;
+            padding-bottom: 10px;
+            margin: 25px 0 15px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus {
+            border-color: #000;
+            outline: none;
+            box-shadow: 0 0 5px #000;
+        }
+        
+        .btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .proposal-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .proposal-list th {
+            background: #000;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .proposal-list td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .proposal-list tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .proposal-list tr:hover {
+            background-color: white;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .status-elaboracao {
+            background-color: #ffeb3b;
+            color: #000;
+        }
+        
+        .status-aprovacao {
+            background-color: #f1a10e;
+            color: #000;
+        }
+        
+        .status-aprovado {
+            background-color: #4caf50;
+            color: #000;
+        }
+        
+        .status-cancelado {
+            background-color: #f44336;
+            color: #000;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            color: #1a2a6c;
+        }
+        
+        .delete-btn {
+            color: #b21f1f;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .markdown-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .download-btn {
+            margin-top: 20px;
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+        }
+        
+        .notification.error {
+            background: linear-gradient(to right, #f44336, #b71c1c);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .proposal-list {
+                font-size: 0.9rem;
+            }
+            
+            .proposal-list th, .proposal-list td {
+                padding: 10px;
+            }
+        }
 
-    .filter-container {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 25px;
-      align-items: center;
-    }
-    
-    .filter-container label {
-      margin-bottom: 0;
-      white-space: nowrap;
-      font-weight: bold;
-      color: #1a2a6c;
-      font-size: 1.1rem;
-    }
-    
-    .filter-container select {
-      flex: 1;
-      padding: 12px;
-    }
-    
-    .filter-btn {
-      background: #1a2a6c;
-      padding: 12px 20px;
-    }
-    
-    .client-card {
-      background: #f0f5ff;
-      padding: 18px;
-      border-radius: 10px;
-      margin-bottom: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-    }
-    
-    .client-name {
-      font-weight: bold;
-      color: #1a2a6c;
-      font-size: 1.1rem;
-    }
+        /* Novo estilo para o filtro */
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .filter-container label {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        
+        .filter-container select {
+            flex: 1;
+        }
+        
+        .filter-btn {
+            background: #1a2a6c;
+        }
   </style>
 
   <!-- Firebase SDK -->
@@ -425,82 +289,65 @@
 <body>
   <div class="container">
     <header>
-      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
-      <p>Gerencie suas propostas e gere relatórios em Markdown</p>
+      <h1><font color="white">Gerador de Propostas </font></h1>
+      <font color="white"><p style="text-align: center;">Gerencie suas propostas e gere relatórios em Markdown</p></font>
     </header>
 
     <!-- Tela de login -->
     <div id="login-section">
-      <div class="login-container">
-        <div class="login-card">
-          <div class="login-title">
-            <i class="fas fa-lock"></i>
-            <h2>Acesso ao Sistema</h2>
-          </div>
+      <h2>Login / Cadastro por Telefone</h2>
 
-          <div id="login-form">
-            <div class="form-group">
-              <label for="login-email">Email</label>
-              <input type="email" id="login-email" placeholder="seu@email.com" />
-            </div>
+      <div class="form-group">
+        <label for="phone-number"><font color="#000">Número de telefone</font></label>
+        <input type="text" id="phone-number" placeholder="+55 11 99999-9999" />
+      </div>
 
-            <div class="form-group">
-              <label for="login-password">Senha</label>
-              <input type="password" id="login-password" placeholder="Sua senha" />
-            </div>
+      <div id="recaptcha-container"></div>
 
-            <button id="login-btn" class="btn">
-              <i class="fas fa-sign-in-alt"></i> Entrar
-            </button>
+      <button id="send-code-btn" class="btn"><i class="fas fa-paper-plane"></i> Enviar Código</button>
 
-            <!-- Link para cadastro removido -->
-          </div>
-
-          <!-- Formulário de cadastro removido -->
-</div>
+      <div id="verification-code-section" class="hidden">
+        <div class="form-group">
+          <label for="verification-code"><font color="#000">Código de Verificação</font></label>
+          <input type="text" id="verification-code" placeholder="Digite o código recebido" />
         </div>
+        <button id="verify-code-btn" class="btn"><i class="fas fa-check"></i> Verificar Código</button>
       </div>
     </div>
 
     <!-- Conteúdo do app que só aparece quando usuário está logado -->
     <div id="app-section" class="hidden">
-      <div class="user-info">
-        <div>
-          <span class="user-email" id="user-email"></span>
-        </div>
-        <button id="logout-btn" class="btn logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Sair
-        </button>
-      </div>
+
+      <button id="logout-btn" class="btn" style="float: right; margin-bottom: 10px;">Logout</button>
 
       <!-- Área de Clientes -->
       <div class="card">
         <h2><i class="fas fa-users"></i> Clientes</h2>
-        <div class="form-group" style="display: flex; gap: 15px; align-items: center;">
+        <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
           <input type="text" id="client-name" placeholder="Nome do cliente" style="flex:1;" />
           <button id="add-client-btn" class="btn" style="flex-shrink: 0;">
             <i class="fas fa-user-plus"></i> Cadastrar Cliente
           </button>
         </div>
-        
-        <div id="clients-list">
-          <!-- Clientes serão carregados aqui -->
-        </div>
+        <label for="clients-select" style="margin-top: 15px; font-weight: bold; color: #1a2a6c;">Clientes</label>
+        <select id="clients-select" style="width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #ddd; font-size: 1rem; margin-bottom: 20px;">
+          <option value="">Selecione um cliente</option>
+        </select>
       </div>
 
       <!-- Área de Propostas -->
       <div class="card">
         <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
         <div class="form-group">
-          <label for="proposal-title">Título da Proposta</label>
+          <label for="proposal-title"><font color="#000">Título da Proposta</font></label>
           <input type="text" id="proposal-title" placeholder="Digite o título da proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-link">Link da Proposta</label>
+          <label for="proposal-link"><font color="#000">Link da Proposta</font></label>
           <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-status">Status da Proposta</label>
+          <label for="proposal-status"><font color="#000">Status da Proposta</font></label>
           <select id="proposal-status">
             <option value="elaboracao">🟡 Em elaboração</option>
             <option value="aprovacao">🟠 Em aprovação do cliente</option>
@@ -508,14 +355,6 @@
             <option value="cancelado">🔴 Cancelado</option>
           </select>
         </div>
-        
-        <div class="form-group">
-          <label for="clients-select">Selecione o Cliente</label>
-          <select id="clients-select" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 1.05rem; margin-bottom: 20px;">
-            <option value="">Selecione um cliente</option>
-          </select>
-        </div>
-        
         <button id="add-proposal" class="btn">
           <i class="fas fa-save"></i> Salvar Proposta
         </button>
@@ -558,10 +397,6 @@
     </div>
 
     <div id="notification" class="notification"></div>
-    
-    <footer>
-      <p>Gerador de Propostas &copy; 2023 - Todos os direitos reservados</p>
-    </footer>
   </div>
 
   <script>
@@ -580,29 +415,15 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Configuração de persistência de sessão
-    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-      .catch((error) => {
-        console.error("Erro ao configurar persistência:", error);
-      });
-
     // Elementos do DOM
     const loginSection = document.getElementById('login-section');
     const appSection = document.getElementById('app-section');
-    const userEmailSpan = document.getElementById('user-email');
 
-    // Elementos de login
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const loginEmailInput = document.getElementById('login-email');
-    const loginPasswordInput = document.getElementById('login-password');
-    const loginBtn = document.getElementById('login-btn');
-    const registerEmailInput = document.getElementById('register-email');
-    const registerPasswordInput = document.getElementById('register-password');
-    const confirmPasswordInput = document.getElementById('confirm-password');
-    const registerBtn = document.getElementById('register-btn');
-    const showRegisterLink = document.getElementById('show-register');
-    const showLoginLink = document.getElementById('show-login');
+    const phoneNumberInput = document.getElementById('phone-number');
+    const sendCodeBtn = document.getElementById('send-code-btn');
+    const verificationCodeSection = document.getElementById('verification-code-section');
+    const verificationCodeInput = document.getElementById('verification-code');
+    const verifyCodeBtn = document.getElementById('verify-code-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const notification = document.getElementById('notification');
 
@@ -610,7 +431,6 @@
     const clientNameInput = document.getElementById('client-name');
     const addClientBtn = document.getElementById('add-client-btn');
     const clientsSelect = document.getElementById('clients-select');
-    const clientsList = document.getElementById('clients-list');
 
     // Elementos Propostas
     const proposalTitleInput = document.getElementById('proposal-title');
@@ -620,11 +440,12 @@
     const proposalsList = document.getElementById('proposals-list');
     const markdownOutput = document.getElementById('markdown-output');
 
-    // Elementos de Filtro
+    // Elementos de Filtro (novos)
     const proposalFilter = document.getElementById('proposal-filter');
     const applyFilterBtn = document.getElementById('apply-filter');
 
     // Variáveis
+    let confirmationResult;
     let clients = [];
     let proposals = [];
     let currentFilter = "all";
@@ -632,115 +453,106 @@
     function showNotification(message, isSuccess = true) {
       notification.textContent = message;
       notification.className = 'notification ' + (isSuccess ? 'success' : 'error') + ' show';
-      setTimeout(() => notification.classList.remove('show'), 4000);
+      setTimeout(() => notification.classList.remove('show'), 3000);
     }
 
-    // Alternar entre login e cadastro
-    // Alternância entre login e cadastro removida
-loginForm.classList.remove('hidden');
-    });
-
-    // Login com email/senha
-    loginBtn.addEventListener('click', () => {
-  console.log("Botão de login clicado");
-  const email = loginEmailInput.value.trim();
-  const password = loginPasswordInput.value.trim();
-
-  if (!email || !password) {
-    showNotification('Por favor, preencha todos os campos!', false);
-    return;
-  }
-
-  loginBtn.disabled = true;
-  loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
-
-  auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      showNotification(`Bem-vindo, ${user.email}!`);
-      userEmailSpan.textContent = user.email;
-      loginSection.classList.add('hidden');
-      appSection.classList.remove('hidden');
-      loadClients();
-      loadProposals();
-    })
-    .catch((error) => {
-      console.error(error);
-      let errorMessage = "Erro ao fazer login!";
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = "Usuário não encontrado!";
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = "Senha incorreta!";
-      }
-      showNotification(errorMessage, false);
-    })
-    .finally(() => {
-      loginBtn.disabled = false;
-      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
-    });
-});
-
-
-    // Cadastro de novo usuário
-    // Listener de cadastro removido
-
-    logoutBtn.addEventListener('click', () => {
-      logoutBtn.disabled = true;
-      logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saindo...';
-      
-      auth.signOut().then(() => {
-        showNotification('Desconectado com sucesso.');
-        loginSection.classList.remove('hidden');
-        appSection.classList.add('hidden');
-        // Limpar dados locais
-        clients = [];
-        proposals = [];
-        clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
-        proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
-        clientsList.innerHTML = '';
-        proposalsList.innerHTML = '';
-        markdownOutput.textContent = '';
-        
-        // Limpar campos de login
-        loginEmailInput.value = '';
-        loginPasswordInput.value = '';
-      }).catch(error => {
-        showNotification('Erro ao desconectar: ' + error.message, false);
-      }).finally(() => {
-        logoutBtn.disabled = false;
-        logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Sair';
+    // Inicializa o recaptcha invisível
+    let recaptchaVerifier;
+    window.onload = () => {
+      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
       });
-    });
+      recaptchaVerifier.render();
 
-    // Verificar estado de autenticação
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        userEmailSpan.textContent = user.email;
-        loginSection.classList.add('hidden');
-        appSection.classList.remove('hidden');
-        loadClients();
-        loadProposals();
-      } else {
-        loginSection.classList.remove('hidden');
-        appSection.classList.add('hidden');
-      }
-    });
+      sendCodeBtn.addEventListener('click', () => {
+        const phoneNumber = phoneNumberInput.value.trim();
+        if (!phoneNumber) {
+          showNotification('Por favor, insira um número de telefone válido!', false);
+          return;
+        }
+        sendCodeBtn.disabled = true;
+        auth.signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
+          .then((result) => {
+            confirmationResult = result;
+            showNotification('Código enviado! Verifique seu celular.');
+            verificationCodeSection.classList.remove('hidden');
+          })
+          .catch((error) => {
+            console.error(error);
+            showNotification('Erro ao enviar código: ' + error.message, false);
+          })
+          .finally(() => {
+            sendCodeBtn.disabled = false;
+          });
+      });
+
+      verifyCodeBtn.addEventListener('click', () => {
+        const code = verificationCodeInput.value.trim();
+        if (!code) {
+          showNotification('Por favor, insira o código de verificação!', false);
+          return;
+        }
+        verifyCodeBtn.disabled = true;
+        confirmationResult.confirm(code)
+          .then((result) => {
+            const user = result.user;
+            showNotification(`Bem-vindo, usuário ${user.phoneNumber}!`);
+            loginSection.classList.add('hidden');
+            appSection.classList.remove('hidden');
+            loadClients();
+            loadProposals();
+          })
+          .catch((error) => {
+            console.error(error);
+            showNotification('Código inválido ou expirado.', false);
+          })
+          .finally(() => {
+            verifyCodeBtn.disabled = false;
+          });
+      });
+
+      logoutBtn.addEventListener('click', () => {
+        logoutBtn.disabled = true;
+        auth.signOut().then(() => {
+          showNotification('Desconectado com sucesso.');
+          loginSection.classList.remove('hidden');
+          appSection.classList.add('hidden');
+        }).finally(() => {
+          logoutBtn.disabled = false;
+        });
+      });
+
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          loginSection.classList.add('hidden');
+          appSection.classList.remove('hidden');
+          loadClients();
+          loadProposals();
+        } else {
+          loginSection.classList.remove('hidden');
+          appSection.classList.add('hidden');
+        }
+      });
+    };
 
     // --- CLIENTES ---
 
     function loadClients() {
       const user = auth.currentUser;
-      if (!user) return;
+      if (!user) {
+        clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+        proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
+        clients = [];
+        return;
+      }
 
       db.collection('clientes').orderBy('name').get()
         .then(snapshot => {
           clients = [];
           clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
           proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
-          clientsList.innerHTML = '';
 
           if (snapshot.empty) {
-            clientsList.innerHTML = '<p>Nenhum cliente cadastrado ainda.</p>';
             return;
           }
 
@@ -748,28 +560,17 @@ loginForm.classList.remove('hidden');
             const client = { ...doc.data(), docId: doc.id };
             clients.push(client);
 
-            // Adicionar ao seletor de clientes
+            // Opção para o seletor de clientes
             const option = document.createElement('option');
             option.value = client.docId;
             option.textContent = client.name;
             clientsSelect.appendChild(option);
 
-            // Adicionar ao filtro
+            // Opção para o filtro
             const filterOption = document.createElement('option');
             filterOption.value = client.docId;
             filterOption.textContent = client.name;
             proposalFilter.appendChild(filterOption);
-
-            // Adicionar à lista de clientes
-            const clientCard = document.createElement('div');
-            clientCard.className = 'client-card';
-            clientCard.innerHTML = `
-              <span class="client-name">${client.name}</span>
-              <button class="action-btn delete-btn" onclick="deleteClient('${client.docId}')">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            `;
-            clientsList.appendChild(clientCard);
           });
         })
         .catch(error => {
@@ -794,30 +595,6 @@ loginForm.classList.remove('hidden');
           showNotification('Erro ao cadastrar cliente!', false);
         });
     });
-
-    window.deleteClient = function(docId) {
-      if (!confirm('Tem certeza que deseja excluir este cliente? Todas as propostas associadas também serão excluídas.')) return;
-      
-      db.collection('clientes').doc(docId).delete()
-        .then(() => {
-          showNotification('Cliente excluído com sucesso!');
-          // Excluir todas as propostas associadas a este cliente
-          const batch = db.batch();
-          proposals.filter(p => p.clientId === docId).forEach(p => {
-            const propRef = db.collection('propostas').doc(p.docId);
-            batch.delete(propRef);
-          });
-          
-          return batch.commit();
-        })
-        .then(() => {
-          loadClients();
-          loadProposals();
-        })
-        .catch(error => {
-          showNotification('Erro ao excluir cliente: ' + error.message, false);
-        });
-    }
 
     // --- PROPOSTAS ---
 
@@ -853,7 +630,11 @@ loginForm.classList.remove('hidden');
 
     function loadProposals() {
       const user = auth.currentUser;
-      if (!user) return;
+      if (!user) {
+        proposalsList.innerHTML = '';
+        markdownOutput.textContent = '';
+        return;
+      }
 
       db.collection('propostas').orderBy('id', 'desc').get().then((querySnapshot) => {
         proposals = [];
@@ -909,8 +690,8 @@ loginForm.classList.remove('hidden');
         const group = groupedByClient[clientId];
 
         const clientRow = document.createElement('tr');
-        clientRow.innerHTML = `<td colspan="3" style="background: #1a2a6c; color: white; font-weight: bold; padding: 15px;">
-          <i class="fas fa-user"></i> Cliente: ${group.clientName}</td>`;
+        clientRow.innerHTML = `<td colspan="3" style="background: #1a2a6c; color: white; font-weight: bold; padding: 10px;">
+          Cliente: ${group.clientName}</td>`;
         proposalsList.appendChild(clientRow);
 
         group.proposals.forEach(proposal => {
@@ -923,12 +704,10 @@ loginForm.classList.remove('hidden');
           }
 
           const row = document.createElement('tr');
-          row.innerHTML = `<td>${proposal.title}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td>
-              <button class="action-btn edit-btn" onclick="editProposalByDocId('${proposal.docId}')"><i class="fas fa-edit"></i></button>
-              <button class="action-btn delete-btn" onclick="deleteProposalByDocId('${proposal.docId}')"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
+          row.innerHTML = `<td>${proposal.title}</td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td>
+            <button class="action-btn edit-btn" onclick="editProposalByDocId('${proposal.docId}')"><i class="fas fa-edit"></i></button>
+            <button class="action-btn delete-btn" onclick="deleteProposalByDocId('${proposal.docId}')"><i class="fas fa-trash-alt"></i></button>
+          </td>`;
 
           proposalsList.appendChild(row);
         });
@@ -1016,7 +795,6 @@ loginForm.classList.remove('hidden');
       
       a.click();
       URL.revokeObjectURL(url);
-      showNotification('Markdown baixado com sucesso!');
     });
 
     // Funções globais para os botões de ação
