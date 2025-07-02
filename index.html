@@ -385,36 +385,81 @@
 
     // Inicializa o recaptcha invisível
     let recaptchaVerifier;
-    window.onload = () => {
-      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          // reCAPTCHA resolvido - pode prosseguir
-        }
+window.onload = () => {
+  recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+    size: 'invisible',
+  });
+  recaptchaVerifier.render();
+
+  sendCodeBtn.addEventListener('click', () => {
+    const phoneNumber = phoneNumberInput.value.trim();
+    if (!phoneNumber) {
+      showNotification('Por favor, insira um número de telefone válido!', false);
+      return;
+    }
+    sendCodeBtn.disabled = true;
+    auth.signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
+      .then((result) => {
+        confirmationResult = result;
+        showNotification('Código enviado! Verifique seu celular.');
+        verificationCodeSection.classList.remove('hidden');
+      })
+      .catch((error) => {
+        console.error(error);
+        showNotification('Erro ao enviar código: ' + error.message, false);
+      })
+      .finally(() => {
+        sendCodeBtn.disabled = false;
       });
-      recaptchaVerifier.render();
-    };
+  });
 
-    let confirmationResult;
+  verifyCodeBtn.addEventListener('click', () => {
+    const code = verificationCodeInput.value.trim();
+    if (!code) {
+      showNotification('Por favor, insira o código de verificação!', false);
+      return;
+    }
+    verifyCodeBtn.disabled = true;
+    confirmationResult.confirm(code)
+      .then((result) => {
+        const user = result.user;
+        showNotification(`Bem-vindo, usuário ${user.phoneNumber}!`);
+        loginSection.classList.add('hidden');
+        appSection.classList.remove('hidden');
+        loadProposals();
+      })
+      .catch((error) => {
+        console.error(error);
+        showNotification('Código inválido ou expirado.', false);
+      })
+      .finally(() => {
+        verifyCodeBtn.disabled = false;
+      });
+  });
 
-    sendCodeBtn.addEventListener('click', () => {
-      const phoneNumber = phoneNumberInput.value.trim();
-      if (!phoneNumber) {
-        showNotification('Por favor, insira um número de telefone válido!', false);
-        return;
-      }
-
-      auth.signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
-        .then((result) => {
-          confirmationResult = result;
-          showNotification('Código enviado! Verifique seu celular.');
-          verificationCodeSection.classList.remove('hidden');
-        })
-        .catch((error) => {
-          console.error(error);
-          showNotification('Erro ao enviar código: ' + error.message, false);
-        });
+  logoutBtn.addEventListener('click', () => {
+    logoutBtn.disabled = true;
+    auth.signOut().then(() => {
+      showNotification('Desconectado com sucesso.');
+      loginSection.classList.remove('hidden');
+      appSection.classList.add('hidden');
+    }).finally(() => {
+      logoutBtn.disabled = false;
     });
+  });
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      loginSection.classList.add('hidden');
+      appSection.classList.remove('hidden');
+      loadProposals();
+    } else {
+      loginSection.classList.remove('hidden');
+      appSection.classList.add('hidden');
+    }
+  });
+};
+
 
     verifyCodeBtn.addEventListener('click', () => {
       const code = verificationCodeInput.value.trim();
