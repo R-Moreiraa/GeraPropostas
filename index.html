@@ -14,7 +14,7 @@
         }
         
         body {
-            background: #000;
+            background: White;
             color: #333;
             padding: 20px;
             min-height: 100vh;
@@ -23,7 +23,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: White;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             overflow: hidden;
@@ -45,7 +45,7 @@
         }
         
         h2 {
-            color: #1a2a6c;
+            color: #000;
             border-bottom: 2px solid #b21f1f;
             padding-bottom: 10px;
             margin: 25px 0 15px;
@@ -54,7 +54,7 @@
         .card {
             background-color: white;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             padding: 25px;
             margin-bottom: 30px;
         }
@@ -79,13 +79,13 @@
         }
         
         input:focus, select:focus {
-            border-color: #1a2a6c;
+            border-color: #000;
             outline: none;
-            box-shadow: 0 0 5px rgba(26, 42, 108, 0.3);
+            box-shadow: 0 0 5px #000;
         }
         
         .btn {
-            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            background: #000;
             color: white;
             border: none;
             padding: 12px 25px;
@@ -115,7 +115,7 @@
         }
         
         .proposal-list th {
-            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            background: #000;
             color: white;
             padding: 15px;
             text-align: left;
@@ -131,7 +131,7 @@
         }
         
         .proposal-list tr:hover {
-            background-color: #f1f1f1;
+            background-color: white;
         }
         
         .status-badge {
@@ -145,22 +145,22 @@
         
         .status-elaboracao {
             background-color: #ffeb3b;
-            color: #333;
+            color: #000;
         }
         
         .status-aprovacao {
-            background-color: #2196f3;
-            color: white;
+            background-color: #f1a10e;
+            color: #000;
         }
         
         .status-aprovado {
             background-color: #4caf50;
-            color: white;
+            color: #000;
         }
         
         .status-cancelado {
             background-color: #f44336;
-            color: white;
+            color: #000;
         }
         
         .action-btn {
@@ -271,17 +271,9 @@
   </script>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
-      <p>Salvando dados com Firebase Firestore</p>
-    </header>
-	
-</head>
-<body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-file-contract"></i> Gerador de Status de Proposta</h1>
+		 <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
             <p>Gerencie suas propostas e gere relatórios em Markdown</p>
         </header>
         
@@ -300,10 +292,10 @@
             <div class="form-group">
                 <label for="proposal-status">Status da Proposta</label>
                 <select id="proposal-status">
-                    <option value="elaboracao">Em elaboração</option>
-                    <option value="aprovacao">Em aprovação do cliente</option>
-                    <option value="aprovado">Aprovado</option>
-                    <option value="cancelado">Cancelado</option>
+                    <option value="elaboracao">🟡Em elaboração</option>
+                    <option value="aprovacao">🟠Em aprovação do cliente</option>
+                    <option value="aprovado">🟢Aprovado</option>
+                    <option value="cancelado">🔴Cancelado</option>
                 </select>
             </div>
             
@@ -343,7 +335,7 @@
     </div>
     
     <footer>
-        Gerador de Status de Proposta &copy; 2023 - Todos os direitos reservados
+        Developed by Rodrigo Moreira
     </footer>
     
     <div class="notification" id="notification"></div>
@@ -395,19 +387,19 @@
                 switch(proposal.status) {
                     case 'elaboracao':
                         statusClass = 'status-elaboracao';
-                        statusText = 'Em elaboração';
+                        statusText = '🟡 Em Elaboração';
                         break;
                     case 'aprovacao':
                         statusClass = 'status-aprovacao';
-                        statusText = 'Em aprovação';
+                        statusText = '🟠 Em Aprovação do Cliente';
                         break;
                     case 'aprovado':
                         statusClass = 'status-aprovado';
-                        statusText = 'Aprovado';
+                        statusText = '🟢 Aprovado';
                         break;
                     case 'cancelado':
                         statusClass = 'status-cancelado';
-                        statusText = 'Cancelado';
+                        statusText = '🔴 Cancelado';
                         break;
                 }
                 
