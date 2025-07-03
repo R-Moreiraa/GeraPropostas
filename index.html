@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gerador de Propostas - Correção de Erros</title>
+  <title>Gerador de Propostas - Links Firebase</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     * {
@@ -555,17 +555,6 @@
     .client-subtitle {
       font-size: 1.2rem;
     }
-    
-    .error-message {
-      color: #f44336;
-      background-color: #ffebee;
-      border: 1px solid #f44336;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0;
-      text-align: center;
-      font-weight: bold;
-    }
   </style>
 
   <!-- Firebase SDK -->
@@ -580,8 +569,6 @@
       <h1 class="client-title"><i class="fas fa-table"></i> Propostas do Cliente</h1>
       <p class="client-subtitle">Visualização simplificada para compartilhamento</p>
     </div>
-    
-    <div id="client-error" class="error-message hidden"></div>
     
     <table class="proposal-list">
       <thead>
@@ -639,8 +626,6 @@
           <i class="fas fa-sign-out-alt"></i> Sair
         </button>
       </div>
-
-      <div id="app-error" class="error-message hidden"></div>
 
       <!-- Área de Propostas -->
       <div class="card">
@@ -776,8 +761,6 @@
     const appSection = document.getElementById('app-section');
     const userEmailSpan = document.getElementById('user-email');
     const notification = document.getElementById('notification');
-    const appError = document.getElementById('app-error');
-    const clientError = document.getElementById('client-error');
 
     // Elementos de login
     const loginEmailInput = document.getElementById('login-email');
@@ -823,17 +806,6 @@
       notification.textContent = message;
       notification.className = 'notification ' + (isSuccess ? 'success' : 'error') + ' show';
       setTimeout(() => notification.classList.remove('show'), 4000);
-    }
-
-    // Função para mostrar erros na interface
-    function showAppError(message) {
-      appError.textContent = message;
-      appError.classList.remove('hidden');
-    }
-    
-    function showClientError(message) {
-      clientError.textContent = message;
-      clientError.classList.remove('hidden');
     }
 
     // Função para definir estado de loading
@@ -982,8 +954,6 @@
           });
         })
         .catch(error => {
-          console.error('Erro ao carregar clientes:', error);
-          showAppError('Erro ao carregar clientes: ' + error.message);
           showNotification('Erro ao carregar clientes: ' + error.message, false);
         });
     }
@@ -1004,8 +974,7 @@
           clientNameInput.value = '';
           loadClients();
         })
-        .catch(error => {
-          console.error('Erro ao cadastrar cliente:', error);
+        .catch(() => {
           showNotification('Erro ao cadastrar cliente!', false);
         })
         .finally(() => {
@@ -1047,10 +1016,7 @@
             resetProposalForm();
             loadProposals();
           })
-          .catch(error => {
-            console.error('Erro ao atualizar proposta:', error);
-            showNotification('Erro ao atualizar proposta!', false);
-          })
+          .catch(() => showNotification('Erro ao atualizar proposta!', false))
           .finally(() => {
             setLoading(addProposalBtn, false, '<i class="fas fa-save"></i> Salvar Proposta');
           });
@@ -1064,10 +1030,7 @@
             resetProposalForm();
             loadProposals();
           })
-          .catch(error => {
-            console.error('Erro ao adicionar proposta:', error);
-            showNotification('Erro ao adicionar proposta!', false);
-          })
+          .catch(() => showNotification('Erro ao adicionar proposta!', false))
           .finally(() => {
             setLoading(addProposalBtn, false, '<i class="fas fa-save"></i> Salvar Proposta');
           });
@@ -1087,44 +1050,27 @@
       const user = auth.currentUser;
       if (!user) return;
 
-      db.collection('propostas').get()
-        .then((querySnapshot) => {
-          proposals = [];
-          proposalsList.innerHTML = '';
-          appError.classList.add('hidden');
+      db.collection('propostas').orderBy('createdAt', 'desc').get().then((querySnapshot) => {
+        proposals = [];
+        proposalsList.innerHTML = '';
 
-          if (querySnapshot.empty) {
-            proposalsList.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 30px;">
-              <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
-              <p>Nenhuma proposta cadastrada ainda.</p></td></tr>`;
-            markdownOutput.textContent = '## Nenhuma proposta cadastrada';
-            return;
-          }
+        if (querySnapshot.empty) {
+          proposalsList.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 30px;">
+          <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
+          <p>Nenhuma proposta cadastrada ainda.</p></td></tr>`;
+          markdownOutput.textContent = '## Nenhuma proposta cadastrada';
+          return;
+        }
 
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            // Garantir que temos um campo createdAt
-            if (!data.createdAt) {
-              data.createdAt = firebase.firestore.Timestamp.fromDate(new Date());
-            }
-            proposals.push({ ...data, docId: doc.id });
-          });
-
-          // Ordenar por data de criação (mais recente primeiro)
-          proposals.sort((a, b) => {
-            const aDate = a.createdAt.toDate().getTime();
-            const bDate = b.createdAt.toDate().getTime();
-            return bDate - aDate;
-          });
-
-          renderProposals();
-          generateMarkdown();
-        })
-        .catch(error => {
-          console.error('Erro ao carregar propostas:', error);
-          showAppError('Erro ao carregar propostas: ' + error.message);
-          showNotification('Erro ao carregar propostas: ' + error.message, false);
+        querySnapshot.forEach((doc) => {
+          proposals.push({ ...doc.data(), docId: doc.id });
         });
+
+        renderProposals();
+        generateMarkdown();
+      }).catch(error => {
+        showNotification('Erro ao carregar propostas: ' + error.message, false);
+      });
     }
 
     function renderProposals() {
@@ -1248,10 +1194,6 @@
         .then(() => {
           showNotification('Proposta excluída com sucesso!');
           loadProposals();
-        })
-        .catch(error => {
-          console.error('Erro ao excluir proposta:', error);
-          showNotification('Erro ao excluir proposta: ' + error.message, false);
         });
     }
     
@@ -1300,21 +1242,12 @@
     });
     
     // Carregar propostas do cliente para visualização
-    // Dentro da função loadClientProposals()
-function loadClientProposals(clientId) {
-  // Criar consulta pública (sem autenticação)
-  const publicQuery = db.collection('propostas').where('clientId', '==', clientId);
-  
-  publicQuery.get()  // ← Usar consulta pública
-    .then(snapshot => {
-      // ... restante do código permanece igual ...
-    })
-    .catch(error => {
-      console.error('Erro ao carregar propostas do cliente:', error);
-      clientError.innerHTML = `Erro ao carregar propostas: ${error.message}`;
-      clientError.classList.remove('hidden');
-    });
-}
+    function loadClientProposals(clientId) {
+      db.collection('propostas').where('clientId', '==', clientId)
+        .orderBy('createdAt', 'desc')
+        .get()
+        .then(snapshot => {
+          clientProposalsList.innerHTML = '';
           
           if (snapshot.empty) {
             clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta encontrada para este cliente.</td></tr>`;
@@ -1345,8 +1278,9 @@ function loadClientProposals(clientId) {
         })
         .catch(error => {
           console.error('Erro ao carregar propostas do cliente:', error);
-          clientError.innerHTML = `Erro ao carregar propostas: ${error.message}`;
-          clientError.classList.remove('hidden');
+          clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color: #f44336;">
+            Erro ao carregar propostas. Tente novamente mais tarde.
+          </td></tr>`;
         });
     }
   </script>
