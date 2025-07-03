@@ -16,7 +16,7 @@
     body {
       background: white;
       color: #333;
-      padding: 20px;
+      padding: 77px;
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -31,7 +31,7 @@
       border-radius: 15px;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
       overflow: hidden;
-      padding: 30px;
+      padding: 35px;
     }
     
     header {
@@ -86,7 +86,7 @@
       display: block;
       margin-bottom: 10px;
       font-weight: bold;
-      color: #1a2a6c;
+      color: #000;
       font-size: 1.05rem;
     }
     
@@ -113,7 +113,7 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 1.1rem;
-      font-weight: bold;
+      font-weight: lighter;
       transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
@@ -139,20 +139,25 @@
     }
     
     .proposal-list th {
-      background: #1a2a6c;
+      background: #000;
       color: white;
-      padding: 16px;
-      text-align: left;
+      padding: 10px;
+      text-align: center;
       font-weight: 600;
-    }
-    
+	 
+	  }
+	  
     .proposal-list td {
-      padding: 16px;
-      border-bottom: 1px solid #eee;
-    }
-    
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    height: 10px; /* Altura das linhas */
+    vertical-align: middle; /* Centraliza verticalmente o conteúdo */
+	min-width: 200px; /* ou qualquer valor desejado */
+  } 
     .proposal-list tr:nth-child(even) {
       background-color: #f9f9f9;
+	  font-weight: lighter;
     }
     
     .proposal-list tr:hover {
@@ -163,7 +168,7 @@
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.95rem;
-      font-weight: bold;
+      font-weight: lighter;
       text-align: center;
       display: inline-block;
       min-width: 180px;
@@ -172,21 +177,25 @@
     .status-elaboracao {
       background-color: #ffeb3b;
       color: #000;
+	  font-weight: lighter;
     }
     
     .status-aprovacao {
       background-color: #f1a10e;
       color: #000;
+	  font-weight: lighter;
     }
     
     .status-aprovado {
       background-color: #4caf50;
       color: #000;
+	  font-weight: lighter;
     }
     
     .status-cancelado {
       background-color: #f44336;
       color: #000;
+	  font-weight: lighter;
     }
     
     .action-btn {
@@ -202,6 +211,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+	  font-weight: lighter;
     }
     
     .edit-btn {
@@ -216,14 +226,14 @@
     
     .action-btn:hover {
       transform: scale(1.15);
-      background: #000;
+      background: white;
     }
     
     .markdown-container {
       background-color: #000;
       color: white;
       border-radius: 10px;
-      padding: 25px;
+      padding: 30px;
       margin-top: 25px;
       border: 1px solid #dee2e6;
       font-family: 'Courier New', monospace;
@@ -231,12 +241,15 @@
       max-height: 350px;
       overflow-y: auto;
       box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+	  font-weight: lighter;
+	  display: flex;
     }
     
     .download-btn {
       margin-top: 25px;
       background: #000;
       width: 100%;
+	font-weight: lighter;
     }
     
     footer {
@@ -246,6 +259,7 @@
       margin-top: 30px;
       font-size: 0.95rem;
       font-weight: 500;
+	  font-weight: lighter;
     }
     
     .notification {
@@ -262,6 +276,7 @@
       z-index: 1000;
       font-size: 1.1rem;
       max-width: 400px;
+	  font-weight: lighter;
     }
     
     .notification.show {
@@ -289,6 +304,8 @@
       background: #f0f5ff;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+	  font-weight: lighter;
+	  color: black;
     }
     
     .user-email {
@@ -300,6 +317,7 @@
     .logout-btn {
       background: #000;
       padding: 10px 20px;
+	  font-weight: lighter;
     }
     
     .login-container {
@@ -370,7 +388,7 @@
       }
       
       .login-card {
-        padding: 30px 20px;
+        padding: 10px 20px;
       }
     }
 
@@ -395,7 +413,7 @@
     }
     
     .filter-btn {
-      background: #1a2a6c;
+      background: #000;
       padding: 12px 20px;
     }
     
@@ -448,18 +466,17 @@
       <div class="login-container">
         <div class="login-card">
           <div class="login-title">
-            <i class="fas fa-lock"></i>
-            <h2>Acesso ao Sistema</h2>
+            <h2> <span style="color:black" >Acesso ao Sistema </span> </h2>
           </div>
 
           <div id="login-form">
             <div class="form-group">
-              <label for="login-email">Email</label>
+              <label for="login-email" <span style="color:black" >Email</span> </label>
               <input type="email" id="login-email" placeholder="seu@email.com" />
             </div>
 
             <div class="form-group">
-              <label for="login-password">Senha</label>
+              <label for="login-password" <span style="color:black" >Senha</span> </label>
               <input type="password" id="login-password" placeholder="Sua senha" />
             </div>
 
@@ -484,33 +501,33 @@
 
       <!-- Área de Propostas -->
       <div class="card">
-        <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
+        <h2><span style="color:black"><span style="color:black"</i> Adicionar Nova Proposta</span></h2>
         
         <!-- Formulário de cliente integrado -->
         <div class="client-form">
           <input type="text" id="client-name" placeholder="Nome do cliente" />
           <button id="add-client-btn" class="btn">
-            <i class="fas fa-user-plus"></i> Cadastrar Cliente
+           <i class="fas fa-user-plus"></i> Cadastrar Cliente
           </button>
         </div>
         
         <div class="form-group">
-          <label for="clients-select">Selecione o Cliente</label>
+          <label for="clients-select"<span style="color:black">Selecione o Cliente</span></label>
           <select id="clients-select">
             <option value="">Selecione um cliente</option>
           </select>
         </div>
         
         <div class="form-group">
-          <label for="proposal-title">Título da Proposta</label>
+          <label for="proposal-title"<span style="color:black">Título da Proposta</span></label>
           <input type="text" id="proposal-title" placeholder="Digite o título da proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-link">Link da Proposta</label>
+          <label for="proposal-link"<span style="color:black">Link da Proposta</span></label>
           <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-status">Status da Proposta</label>
+          <label for="proposal-status"<span style="color:black">Status da Proposta</span></label>
           <select id="proposal-status">
             <option value="elaboracao">🟡 Em elaboração</option>
             <option value="aprovacao">🟠 Em aprovação do cliente</option>
@@ -525,11 +542,11 @@
       </div>
 
       <div class="card">
-        <h2><i class="fas fa-list"></i> Lista de Propostas</h2>
+        <h2><i class="fas fa-list"style="color:black"><span style="color:black"</i> Lista de Propostas</span></h2>
         
         <!-- Filtro por cliente -->
         <div class="filter-container">
-          <label for="proposal-filter">Filtrar por Cliente:</label>
+          <label for="proposal-filter"<span style="color:black">Filtrar por Cliente:</span></label>
           <select id="proposal-filter">
             <option value="all">Todos os Clientes</option>
           </select>
@@ -552,8 +569,8 @@
       </div>
 
       <div class="card">
-        <h2><i class="fab fa-markdown"></i> Tabela Markdown Gerada</h2>
-        <p>Esta tabela será atualizada automaticamente conforme as propostas são adicionadas ou editadas.</p>
+        <h2><i class='fab fa-markdown' style="color:black"></i><span style="color:black"</i> Tabela Markdown Gerada</span></h2>
+        <h5>Esta tabela será atualizada automaticamente conforme as propostas são adicionadas ou editadas.</h5>
         <div class="markdown-container" id="markdown-output"></div>
         <button id="download-md" class="btn download-btn">
           <i class="fas fa-download"></i> Baixar Markdown
@@ -561,11 +578,8 @@
       </div>
     </div>
 
-    <div id="notification" class="notification"></div>
-    
-    <footer>
-      <p>Gerador de Propostas &copy; 2023 - Todos os direitos reservados</p>
-    </footer>
+    <!-- <div id="notification" class="notification"></div> -->
+    <!-- <div id="notification" class="notification"></div> -->
   </div>
 
   <script>
