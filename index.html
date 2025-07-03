@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gerador de Propostas - Links Firebase</title>
+  <title>Gerador de Propostas com Autenticação</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     * {
@@ -14,7 +14,7 @@
     }
     
     body {
-      background: white;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #000);
       color: #333;
       padding: 20px;
       min-height: 100vh;
@@ -37,16 +37,31 @@
     header {
       text-align: center;
       padding: 25px 0;
-      background: #000;
+      background: linear-gradient(to right, #1a2a6c, #000);
       color: white;
       border-radius: 10px;
       margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+      background-size: cover;
     }
     
     h1 {
       font-size: 2.5rem;
       margin-bottom: 10px;
       color: white;
+      position: relative;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     
     h2 {
@@ -66,20 +81,33 @@
     .card {
       background-color: white;
       border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
       padding: 30px;
       margin-bottom: 35px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       border: 1px solid #eee;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(to bottom, #1a2a6c, #b21f1f);
     }
     
     .card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
     }
     
     .form-group {
       margin-bottom: 22px;
+      position: relative;
     }
     
     label {
@@ -106,25 +134,41 @@
     }
     
     .btn {
-      background: #000;
+      background: linear-gradient(to right, #1a2a6c, #000);
       color: white;
       border: none;
       padding: 14px 28px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 1.1rem;
-      font-weight: lighter;
+      font-weight: 500;
       transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    .btn:hover::after {
+      left: 100%;
     }
     
     .btn:hover {
       transform: translateY(-3px);
       box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
-      background: #000;
     }
     
     .btn i {
@@ -139,23 +183,21 @@
     }
     
     .proposal-list th {
-      background: #000;
+      background: linear-gradient(to right, #1a2a6c, #000);
       color: white;
-      padding: 10px;
+      padding: 12px;
       text-align: center;
       font-weight: 600;
     }
     
     .proposal-list td {
       border: 1px solid #ccc;
-      padding: 10px;
+      padding: 12px;
       text-align: center;
-      height: 10px;
     } 
     
     .proposal-list tr:nth-child(even) {
       background-color: #f9f9f9;
-      font-weight: lighter;
     }
     
     .proposal-list tr:hover {
@@ -166,7 +208,7 @@
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.95rem;
-      font-weight: lighter;
+      font-weight: 500;
       text-align: center;
       display: inline-block;
       min-width: 180px;
@@ -175,25 +217,21 @@
     .status-elaboracao {
       background-color: #ffeb3b;
       color: #000;
-      font-weight: lighter;
     }
     
     .status-aprovacao {
       background-color: #f1a10e;
       color: #000;
-      font-weight: lighter;
     }
     
     .status-aprovado {
       background-color: #4caf50;
       color: #000;
-      font-weight: lighter;
     }
     
     .status-cancelado {
       background-color: #f44336;
       color: #000;
-      font-weight: lighter;
     }
     
     .action-btn {
@@ -209,11 +247,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-weight: lighter;
     }
     
     .edit-btn {
-      color: #000;
+      color: #1a2a6c;
       background: rgba(26, 42, 108, 0.1);
     }
     
@@ -239,15 +276,13 @@
       max-height: 350px;
       overflow-y: auto;
       box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
-      font-weight: lighter;
       display: flex;
     }
     
     .download-btn {
       margin-top: 25px;
-      background: #000;
+      background: linear-gradient(to right, #1a2a6c, #000);
       width: 100%;
-      font-weight: lighter;
     }
     
     footer {
@@ -257,7 +292,6 @@
       margin-top: 30px;
       font-size: 0.95rem;
       font-weight: 500;
-      font-weight: lighter;
     }
     
     .notification {
@@ -274,7 +308,6 @@
       z-index: 1000;
       font-size: 1.1rem;
       max-width: 400px;
-      font-weight: lighter;
     }
     
     .notification.show {
@@ -282,11 +315,11 @@
     }
     
     .notification.success {
-      background: #000;
+      background: linear-gradient(to right, #4caf50, #2e7d32);
     }
     
     .notification.error {
-      background: #000;
+      background: linear-gradient(to right, #f44336, #c62828);
     }
     
     .hidden {
@@ -302,7 +335,6 @@
       background: #f0f5ff;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      font-weight: lighter;
       color: black;
     }
     
@@ -313,9 +345,8 @@
     }
     
     .logout-btn {
-      background: #000;
+      background: linear-gradient(to right, #1a2a6c, #000);
       padding: 10px 20px;
-      font-weight: lighter;
     }
     
     .login-container {
@@ -329,6 +360,18 @@
       border-radius: 15px;
       padding: 40px;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, #1a2a6c, #b21f1f);
     }
     
     .login-title {
@@ -386,7 +429,7 @@
       }
       
       .login-card {
-        padding: 10px 20px;
+        padding: 20px;
       }
     }
 
@@ -395,6 +438,7 @@
       gap: 15px;
       margin-bottom: 25px;
       align-items: center;
+      flex-wrap: wrap;
     }
     
     .filter-container label {
@@ -408,10 +452,11 @@
     .filter-container select {
       flex: 1;
       padding: 12px;
+      min-width: 200px;
     }
     
     .filter-btn {
-      background: #000;
+      background: linear-gradient(to right, #1a2a6c, #000);
       padding: 12px 20px;
     }
     
@@ -436,10 +481,12 @@
       display: flex;
       gap: 15px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     
     .client-form input {
       flex: 1;
+      min-width: 200px;
     }
     
     .client-form button {
@@ -457,6 +504,7 @@
       height: 100%;
       background-color: rgba(0,0,0,0.7);
       overflow: auto;
+      backdrop-filter: blur(5px);
     }
     
     .modal-content {
@@ -465,9 +513,10 @@
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      width: 80%;
+      width: 90%;
       max-width: 600px;
       position: relative;
+      border: 1px solid #1a2a6c;
     }
     
     .close {
@@ -478,13 +527,13 @@
       position: absolute;
       top: 10px;
       right: 15px;
+      cursor: pointer;
     }
     
     .close:hover,
     .close:focus {
       color: black;
       text-decoration: none;
-      cursor: pointer;
     }
     
     .iframe-link {
@@ -495,6 +544,7 @@
       border-radius: 5px;
       background: #f9f9f9;
       cursor: pointer;
+      font-family: monospace;
     }
     
     .iframe-container {
@@ -508,6 +558,7 @@
     .iframe-container textarea {
       height: 100px;
       margin-bottom: 10px;
+      font-family: monospace;
     }
     
     .iframe-preview {
@@ -541,7 +592,7 @@
     .client-header {
       text-align: center;
       padding: 20px;
-      background: #000;
+      background: linear-gradient(to right, #1a2a6c, #000);
       color: white;
       border-radius: 10px;
       margin-bottom: 20px;
@@ -555,6 +606,84 @@
     .client-subtitle {
       font-size: 1.2rem;
     }
+    
+    /* Estilo para o loader */
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #1a2a6c;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .form-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #1a2a6c;
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-wrapper input {
+      padding-left: 45px;
+    }
+    
+    /* Toggle de senha */
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #1a2a6c;
+    }
+    
+    /* Efeito de onda nos botões */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+      transform: translate3d(0, 0, 0);
+    }
+    
+    .ripple:after {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+      background-repeat: no-repeat;
+      background-position: 50%;
+      transform: scale(10, 10);
+      opacity: 0;
+      transition: transform .5s, opacity 1s;
+    }
+    
+    .ripple:active:after {
+      transform: scale(0, 0);
+      opacity: .3;
+      transition: 0s;
+    }
   </style>
 
   <!-- Firebase SDK -->
@@ -567,26 +696,57 @@
   <div id="client-view" class="client-view hidden">
     <div class="client-header">
       <h1 class="client-title"><i class="fas fa-table"></i> Propostas do Cliente</h1>
-      <p class="client-subtitle">Visualização simplificada para compartilhamento</p>
+      <p class="client-subtitle">Visualização protegida por autenticação</p>
     </div>
     
-    <table class="proposal-list">
-      <thead>
-        <tr>
-          <th>Título</th>
-          <th>Status</th>
-          <th>Link</th>
-        </tr>
-      </thead>
-      <tbody id="client-proposals-list"></tbody>
-    </table>
+    <!-- Formulário de autenticação para cliente -->
+    <div id="client-auth-section">
+      <div class="login-container">
+        <div class="login-card">
+          <div class="login-title">
+            <h2> <i class="fas fa-lock"></i> Autenticação Necessária </h2>
+            <p>Insira o código de acesso para visualizar as propostas</p>
+          </div>
+
+          <div class="login-form">
+            <div class="form-group input-wrapper">
+              <i class="fas fa-key form-icon"></i>
+              <input type="password" id="client-access-code" placeholder="Código de acesso" />
+              <i class="fas fa-eye password-toggle" id="toggle-password"></i>
+            </div>
+            
+            <button id="client-login-btn" class="btn ripple">
+              <i class="fas fa-unlock"></i> Acessar Propostas
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Área das propostas (aparece após autenticação) -->
+    <div id="client-proposals-section" class="hidden">
+      <table class="proposal-list">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Status</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody id="client-proposals-list"></tbody>
+      </table>
+      
+      <button id="client-logout-btn" class="btn logout-btn" style="margin-top: 20px;">
+        <i class="fas fa-sign-out-alt"></i> Sair da Visualização
+      </button>
+    </div>
   </div>
 
   <!-- Aplicação principal (aparece apenas quando não tem clientId) -->
   <div id="app-container" class="container">
     <header>
       <h1><i class="fas fa-file-contract"></i> Gerador de Propostas</h1>
-      <p>Gerencie suas propostas e gere relatórios em Markdown</p>
+      <p>Gerencie suas propostas com autenticação segura</p>
     </header>
 
     <!-- Tela de login -->
@@ -594,21 +754,23 @@
       <div class="login-container">
         <div class="login-card">
           <div class="login-title">
-            <h2> <span style="color:black" >Acesso ao Sistema </span> </h2>
+            <i class="fas fa-lock"></i>
+            <h2>Acesso ao Sistema</h2>
           </div>
 
-          <div id="login-form">
-            <div class="form-group">
-              <label for="login-email" <span style="color:black" >Email</span> </label>
+          <div class="login-form">
+            <div class="form-group input-wrapper">
+              <i class="fas fa-envelope form-icon"></i>
               <input type="email" id="login-email" placeholder="seu@email.com" />
             </div>
 
-            <div class="form-group">
-              <label for="login-password" <span style="color:black" >Senha</span> </label>
+            <div class="form-group input-wrapper">
+              <i class="fas fa-lock form-icon"></i>
               <input type="password" id="login-password" placeholder="Sua senha" />
+              <i class="fas fa-eye password-toggle" id="toggle-admin-password"></i>
             </div>
 
-            <button id="login-btn" class="btn">
+            <button id="login-btn" class="btn ripple">
               <i class="fas fa-sign-in-alt"></i> Entrar
             </button>
           </div>
@@ -620,42 +782,43 @@
     <div id="app-section" class="hidden">
       <div class="user-info">
         <div>
+          <span>Usuário: </span>
           <span class="user-email" id="user-email"></span>
         </div>
-        <button id="logout-btn" class="btn logout-btn">
+        <button id="logout-btn" class="btn logout-btn ripple">
           <i class="fas fa-sign-out-alt"></i> Sair
         </button>
       </div>
 
       <!-- Área de Propostas -->
       <div class="card">
-        <h2><span style="color:black"><span style="color:black"</i> Adicionar Nova Proposta</span></h2>
+        <h2><i class="fas fa-plus-circle"></i> Adicionar Nova Proposta</h2>
         
         <!-- Formulário de cliente integrado -->
         <div class="client-form">
           <input type="text" id="client-name" placeholder="Nome do cliente" />
-          <button id="add-client-btn" class="btn">
+          <button id="add-client-btn" class="btn ripple">
            <i class="fas fa-user-plus"></i> Cadastrar Cliente
           </button>
         </div>
         
         <div class="form-group">
-          <label for="clients-select"<span style="color:black">Selecione o Cliente</span></label>
+          <label for="clients-select">Selecione o Cliente</label>
           <select id="clients-select">
             <option value="">Selecione um cliente</option>
           </select>
         </div>
         
         <div class="form-group">
-          <label for="proposal-title"<span style="color:black">Título da Proposta</span></label>
+          <label for="proposal-title">Título da Proposta</label>
           <input type="text" id="proposal-title" placeholder="Digite o título da proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-link"<span style="color:black">Link da Proposta</span></label>
+          <label for="proposal-link">Link da Proposta</label>
           <input type="text" id="proposal-link" placeholder="https://exemplo.com/proposta" />
         </div>
         <div class="form-group">
-          <label for="proposal-status"<span style="color:black">Status da Proposta</span></label>
+          <label for="proposal-status">Status da Proposta</label>
           <select id="proposal-status">
             <option value="elaboracao">🟡 Em elaboração</option>
             <option value="aprovacao">🟠 Em aprovação do cliente</option>
@@ -664,22 +827,22 @@
           </select>
         </div>
         
-        <button id="add-proposal" class="btn">
+        <button id="add-proposal" class="btn ripple">
           <i class="fas fa-save"></i> Salvar Proposta
         </button>
       </div>
 
       <div class="card">
-        <h2><span style="color:black"> Lista de Propostas</span></h2>
+        <h2><i class="fas fa-list"></i> Lista de Propostas</h2>
         
         <!-- Filtro por cliente -->
         <div class="filter-container">
-          <label for="proposal-filter"<span style="color:black">Filtrar por Cliente:</span></label>
+          <label for="proposal-filter">Filtrar por Cliente:</label>
           <select id="proposal-filter">
             <option value="all">Todos os Clientes</option>
           </select>
-          <button id="generate-link-btn" class="btn filter-btn">
-            <i class="fas fa-link"></i> Gerar Link
+          <button id="generate-link-btn" class="btn filter-btn ripple">
+            <i class="fas fa-link"></i> Gerar Link Seguro
           </button>
         </div>
         
@@ -697,10 +860,10 @@
       </div>
 
       <div class="card">
-        <h2><i class='fab fa-markdown' style="color:black"></i><span style="color:black"</i> Tabela Markdown Gerada</span></h2>
+        <h2><i class='fab fa-markdown'></i> Tabela Markdown Gerada</h2>
         <h5>Esta tabela será atualizada automaticamente conforme as propostas são adicionadas ou editadas.</h5>
         <div class="markdown-container" id="markdown-output"></div>
-        <button id="download-md" class="btn download-btn">
+        <button id="download-md" class="btn download-btn ripple">
           <i class="fas fa-download"></i> Baixar Markdown
         </button>
       </div>
@@ -710,11 +873,17 @@
     <div id="link-modal" class="modal">
       <div class="modal-content">
         <span class="close">&times;</span>
-        <h2><i class="fas fa-link"></i> Link de Tabela para Cliente</h2>
-        <p>Use este link para compartilhar a tabela de propostas deste cliente:</p>
+        <h2><i class="fas fa-lock"></i> Link Seguro para Cliente</h2>
+        <p>Este link requer autenticação para acessar as propostas:</p>
         
         <div class="form-group">
-          <label><span style="color:black">Link para Visualização</span></label>
+          <label>Código de Acesso:</label>
+          <input type="text" id="access-code" class="iframe-link" readonly onclick="this.select()" />
+          <small>Compartilhe este código com seu cliente para acessar as propostas</small>
+        </div>
+        
+        <div class="form-group">
+          <label>Link para Visualização:</label>
           <input type="text" id="iframe-link" class="iframe-link" readonly onclick="this.select()" />
         </div>
         
@@ -722,7 +891,7 @@
           <h3><i class="fas fa-code"></i> Código para Incorporação (iframe)</h3>
           <p>Copie e cole este código em qualquer página HTML:</p>
           <textarea id="iframe-code" readonly></textarea>
-          <button id="copy-code-btn" class="btn">
+          <button id="copy-code-btn" class="btn ripple">
             <i class="fas fa-copy"></i> Copiar Código
           </button>
         </div>
@@ -761,18 +930,18 @@
     const appSection = document.getElementById('app-section');
     const userEmailSpan = document.getElementById('user-email');
     const notification = document.getElementById('notification');
-
+    
     // Elementos de login
     const loginEmailInput = document.getElementById('login-email');
     const loginPasswordInput = document.getElementById('login-password');
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
-
+    
     // Elementos Clientes
     const clientNameInput = document.getElementById('client-name');
     const addClientBtn = document.getElementById('add-client-btn');
     const clientsSelect = document.getElementById('clients-select');
-
+    
     // Elementos Propostas
     const proposalTitleInput = document.getElementById('proposal-title');
     const proposalLinkInput = document.getElementById('proposal-link');
@@ -780,34 +949,64 @@
     const addProposalBtn = document.getElementById('add-proposal');
     const proposalsList = document.getElementById('proposals-list');
     const markdownOutput = document.getElementById('markdown-output');
-
+    
     // Elementos de Filtro
     const proposalFilter = document.getElementById('proposal-filter');
     const generateLinkBtn = document.getElementById('generate-link-btn');
-
+    
     // Modal
     const linkModal = document.getElementById('link-modal');
     const closeModal = document.querySelector('.close');
     const iframeLink = document.getElementById('iframe-link');
     const iframeCode = document.getElementById('iframe-code');
     const copyCodeBtn = document.getElementById('copy-code-btn');
-
+    const accessCodeInput = document.getElementById('access-code');
+    
     // Elementos da visualização de cliente
     const clientProposalsList = document.getElementById('client-proposals-list');
-
+    const clientAuthSection = document.getElementById('client-auth-section');
+    const clientProposalsSection = document.getElementById('client-proposals-section');
+    const clientAccessCodeInput = document.getElementById('client-access-code');
+    const clientLoginBtn = document.getElementById('client-login-btn');
+    const clientLogoutBtn = document.getElementById('client-logout-btn');
+    const togglePassword = document.getElementById('toggle-password');
+    const toggleAdminPassword = document.getElementById('toggle-admin-password');
+    
     // Variáveis
     let clients = [];
     let proposals = [];
     let currentFilter = "all";
     let currentProposalId = null;
     let currentClientForLink = null;
-
+    let clientAccessCode = '';
+    
+    // Função para gerar códigos de acesso
+    function generateAccessCode() {
+      return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+    
+    // Função para mostrar notificação
     function showNotification(message, isSuccess = true) {
       notification.textContent = message;
       notification.className = 'notification ' + (isSuccess ? 'success' : 'error') + ' show';
       setTimeout(() => notification.classList.remove('show'), 4000);
     }
-
+    
+    // Toggle password visibility
+    togglePassword.addEventListener('click', () => {
+      const type = clientAccessCodeInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      clientAccessCodeInput.setAttribute('type', type);
+      togglePassword.classList.toggle('fa-eye');
+      togglePassword.classList.toggle('fa-eye-slash');
+    });
+    
+    toggleAdminPassword.addEventListener('click', () => {
+      const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      loginPasswordInput.setAttribute('type', type);
+      toggleAdminPassword.classList.toggle('fa-eye');
+      toggleAdminPassword.classList.toggle('fa-eye-slash');
+    });
+    
     // Função para definir estado de loading
     function setLoading(button, isLoading, defaultText) {
       button.disabled = isLoading;
@@ -815,7 +1014,7 @@
         ? '<i class="fas fa-spinner fa-spin"></i> Processando...' 
         : defaultText;
     }
-
+    
     // Verificar se estamos no modo de visualização de cliente
     const urlParams = new URLSearchParams(window.location.search);
     const clientIdParam = urlParams.get('clientId');
@@ -824,35 +1023,32 @@
       // Modo de visualização de cliente
       appContainer.style.display = 'none';
       clientView.classList.remove('hidden');
-      
-      // Carregar propostas do cliente
-      loadClientProposals(clientIdParam);
     } else {
       // Modo normal da aplicação
       clientView.classList.add('hidden');
       appContainer.style.display = 'block';
     }
-
+    
     // Login com email/senha
     loginBtn.addEventListener('click', () => {
       const email = loginEmailInput.value.trim();
       const password = loginPasswordInput.value.trim();
-
+    
       // Validação de email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         showNotification('Formato de e-mail inválido!', false);
         return;
       }
-
+    
       if (!email || !password) {
         showNotification('Por favor, preencha todos os campos!', false);
         return;
       }
-
+    
       const loginBtnText = loginBtn.innerHTML;
       setLoading(loginBtn, true, loginBtnText);
-
+    
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
           const user = userCredential.user;
@@ -877,7 +1073,7 @@
           setLoading(loginBtn, false, '<i class="fas fa-sign-in-alt"></i> Entrar');
         });
     });
-
+    
     logoutBtn.addEventListener('click', () => {
       const logoutBtnText = logoutBtn.innerHTML;
       setLoading(logoutBtn, true, logoutBtnText);
@@ -905,7 +1101,7 @@
         setLoading(logoutBtn, false, '<i class="fas fa-sign-out-alt"></i> Sair');
       });
     });
-
+    
     // Verificar estado de autenticação
     auth.onAuthStateChanged(user => {
       if (user && !clientIdParam) {
@@ -919,33 +1115,33 @@
         appSection.classList.add('hidden');
       }
     });
-
+    
     // --- CLIENTES ---
-
+    
     function loadClients() {
       const user = auth.currentUser;
       if (!user) return;
-
+    
       db.collection('clientes').orderBy('name').get()
         .then(snapshot => {
           clients = [];
           clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
           proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
-
+    
           if (snapshot.empty) {
             return;
           }
-
+    
           snapshot.forEach(doc => {
             const client = { ...doc.data(), docId: doc.id };
             clients.push(client);
-
+    
             // Adicionar ao seletor de clientes
             const option = document.createElement('option');
             option.value = client.docId;
             option.textContent = client.name;
             clientsSelect.appendChild(option);
-
+    
             // Adicionar ao filtro
             const filterOption = document.createElement('option');
             filterOption.value = client.docId;
@@ -957,17 +1153,17 @@
           showNotification('Erro ao carregar clientes: ' + error.message, false);
         });
     }
-
+    
     addClientBtn.addEventListener('click', () => {
       const name = clientNameInput.value.trim();
       if (!name) {
         showNotification('Por favor, insira o nome do cliente!', false);
         return;
       }
-
+    
       const addClientBtnText = addClientBtn.innerHTML;
       setLoading(addClientBtn, true, addClientBtnText);
-
+    
       db.collection('clientes').add({ name })
         .then(() => {
           showNotification('Cliente cadastrado com sucesso!');
@@ -981,21 +1177,21 @@
           setLoading(addClientBtn, false, '<i class="fas fa-user-plus"></i> Cadastrar Cliente');
         });
     });
-
+    
     // --- PROPOSTAS ---
-
+    
     addProposalBtn.addEventListener('click', () => {
       const title = proposalTitleInput.value.trim();
       const link = proposalLinkInput.value.trim();
       const status = proposalStatusSelect.value;
       const clientId = clientsSelect.value;
-
+    
       if (!clientId) return showNotification('Por favor, selecione um cliente!', false);
       if (!title) return showNotification('Por favor, insira um título para a proposta!', false);
-
+    
       const client = clients.find(c => c.docId === clientId);
       if (!client) return showNotification('Cliente inválido!', false);
-
+    
       const proposalData = {
         title,
         link,
@@ -1004,10 +1200,10 @@
         clientName: client.name,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       };
-
+    
       const addProposalBtnText = addProposalBtn.innerHTML;
       setLoading(addProposalBtn, true, addProposalBtnText);
-
+    
       // Se estiver editando
       if (currentProposalId) {
         db.collection('propostas').doc(currentProposalId).update(proposalData)
@@ -1036,7 +1232,7 @@
           });
       }
     });
-
+    
     // Função resetProposalForm atualizada para limpar TODOS os campos
     function resetProposalForm() {
       proposalTitleInput.value = '';
@@ -1045,15 +1241,15 @@
       clientsSelect.value = '';
       currentProposalId = null;
     }
-
+    
     function loadProposals() {
       const user = auth.currentUser;
       if (!user) return;
-
+    
       db.collection('propostas').orderBy('createdAt', 'desc').get().then((querySnapshot) => {
         proposals = [];
         proposalsList.innerHTML = '';
-
+    
         if (querySnapshot.empty) {
           proposalsList.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 30px;">
           <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
@@ -1061,32 +1257,32 @@
           markdownOutput.textContent = '## Nenhuma proposta cadastrada';
           return;
         }
-
+    
         querySnapshot.forEach((doc) => {
           proposals.push({ ...doc.data(), docId: doc.id });
         });
-
+    
         renderProposals();
         generateMarkdown();
       }).catch(error => {
         showNotification('Erro ao carregar propostas: ' + error.message, false);
       });
     }
-
+    
     function renderProposals() {
       proposalsList.innerHTML = '';
-
+    
       if(proposals.length === 0){
         proposalsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px;">Nenhuma proposta cadastrada.</td></tr>`;
         return;
       }
-
+    
       // Filtrar propostas pelo cliente selecionado
       let filteredProposals = proposals;
       if (currentFilter !== "all") {
         filteredProposals = proposals.filter(p => p.clientId === currentFilter);
       }
-
+    
       filteredProposals.forEach(proposal => {
         let statusClass = '', statusText = '';
         switch(proposal.status) {
@@ -1095,7 +1291,7 @@
           case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
           case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
         }
-
+    
         const row = document.createElement('tr');
         row.innerHTML = `<td>${proposal.title}</td>
           <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -1104,23 +1300,23 @@
             <button class="action-btn edit-btn" onclick="editProposalByDocId('${proposal.docId}')"><i class="fas fa-edit"></i></button>
             <button class="action-btn delete-btn" onclick="deleteProposalByDocId('${proposal.docId}')"><i class="fas fa-trash-alt"></i></button>
           </td>`;
-
+    
         proposalsList.appendChild(row);
       });
     }
-
+    
     function generateMarkdown() {
       if (proposals.length === 0) {
         markdownOutput.textContent = '## Nenhuma proposta cadastrada';
         return;
       }
-
+    
       // Filtrar propostas pelo cliente selecionado
       let filteredProposals = proposals;
       if (currentFilter !== "all") {
         filteredProposals = proposals.filter(p => p.clientId === currentFilter);
       }
-
+    
       let markdown = '';
       
       if (currentFilter === "all") {
@@ -1129,10 +1325,10 @@
         const client = clients.find(c => c.docId === currentFilter);
         markdown += `## Lista de Propostas para: ${client ? client.name : 'Cliente Selecionado'}\n\n`;
       }
-
+    
       markdown += '| Título | Status | Cliente | Link |\n';
       markdown += '|--------|--------|---------|------|\n';
-
+    
       filteredProposals.forEach(p => {
         const statusMap = {
           'elaboracao': 'Em elaboração',
@@ -1142,17 +1338,17 @@
         };
         markdown += `| ${p.title} | ${statusMap[p.status]} | ${p.clientName || '-'} | [Link](${p.link || '#'}) |\n`;
       });
-
+    
       markdownOutput.textContent = markdown;
     }
-
+    
     // Aplicar filtro automaticamente ao mudar o cliente
     proposalFilter.addEventListener('change', () => {
       currentFilter = proposalFilter.value;
       renderProposals();
       generateMarkdown();
     });
-
+    
     // Download markdown
     document.getElementById('download-md').addEventListener('click', () => {
       const markdown = markdownOutput.textContent;
@@ -1172,24 +1368,24 @@
       URL.revokeObjectURL(url);
       showNotification('Markdown baixado com sucesso!');
     });
-
+    
     // Funções globais para os botões de ação
     window.editProposalByDocId = function(docId) {
       const proposal = proposals.find(p => p.docId === docId);
       if (!proposal) return;
-
+    
       proposalTitleInput.value = proposal.title;
       proposalLinkInput.value = proposal.link || '';
       proposalStatusSelect.value = proposal.status;
       clientsSelect.value = proposal.clientId || '';
       currentProposalId = docId;
-
+    
       showNotification('Proposta carregada para edição!');
     }
-
+    
     window.deleteProposalByDocId = function(docId) {
       if (!confirm('Tem certeza que deseja excluir esta proposta?')) return;
-
+    
       db.collection('propostas').doc(docId).delete()
         .then(() => {
           showNotification('Proposta excluída com sucesso!');
@@ -1197,9 +1393,9 @@
         });
     }
     
-    // --- GERAR LINKS DE TABELA ---
+    // --- GERAR LINKS DE TABELA COM AUTENTICAÇÃO ---
     
-    // Gerar link para tabela do cliente
+    // Gerar link para tabela do cliente com autenticação
     generateLinkBtn.addEventListener('click', () => {
       if (currentFilter === 'all') {
         showNotification('Selecione um cliente específico para gerar o link.', false);
@@ -1209,11 +1405,15 @@
       currentClientForLink = clients.find(c => c.docId === currentFilter);
       if (!currentClientForLink) return;
       
+      // Gerar código de acesso único
+      clientAccessCode = generateAccessCode();
+      
       // Gerar URL única para o cliente
       const baseUrl = window.location.href.split('?')[0];
       const url = `${baseUrl}?clientId=${currentClientForLink.docId}`;
       
       iframeLink.value = url;
+      accessCodeInput.value = clientAccessCode;
       
       // Gerar código iframe
       const iframeHtml = `<iframe src="${url}" width="100%" height="500" frameborder="0" style="border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);"></iframe>`;
@@ -1241,48 +1441,123 @@
       }
     });
     
+    // Autenticação do cliente para visualização
+    clientLoginBtn.addEventListener('click', () => {
+      const enteredCode = clientAccessCodeInput.value.trim().toUpperCase();
+      
+      if (!enteredCode) {
+        showNotification('Por favor, insira o código de acesso!', false);
+        return;
+      }
+      
+      // Verificar se o código inserido corresponde ao gerado
+      if (enteredCode === clientAccessCode) {
+        // Autenticação bem-sucedida
+        clientAuthSection.classList.add('hidden');
+        clientProposalsSection.classList.remove('hidden');
+        loadClientProposals(clientIdParam);
+      } else {
+        showNotification('Código de acesso inválido!', false);
+      }
+    });
+    
+    // Logout do cliente
+    clientLogoutBtn.addEventListener('click', () => {
+      clientAuthSection.classList.remove('hidden');
+      clientProposalsSection.classList.add('hidden');
+      clientAccessCodeInput.value = '';
+    });
+    
     // Carregar propostas do cliente para visualização
     function loadClientProposals(clientId) {
-      db.collection('propostas').where('clientId', '==', clientId)
-        .orderBy('createdAt', 'desc')
-        .get()
-        .then(snapshot => {
-          clientProposalsList.innerHTML = '';
-          
-          if (snapshot.empty) {
-            clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta encontrada para este cliente.</td></tr>`;
-            return;
-          }
-          
-          snapshot.forEach(doc => {
-            const proposal = doc.data();
-            let statusClass = '', statusText = '';
+      // Mostrar loader enquanto carrega
+      clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;"><div class="loader"></div></td></tr>`;
+      
+      setTimeout(() => {
+        db.collection('propostas').where('clientId', '==', clientId)
+          .orderBy('createdAt', 'desc')
+          .get()
+          .then(snapshot => {
+            clientProposalsList.innerHTML = '';
             
-            switch(proposal.status) {
-              case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
-              case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
-              case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
-              case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
+            if (snapshot.empty) {
+              clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta encontrada para este cliente.</td></tr>`;
+              return;
             }
             
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${proposal.title}</td>
-              <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-              <td><a href="${proposal.link || '#'}" target="_blank" style="color: #1a2a6c; text-decoration: none; font-weight: bold;">
-                <i class="fas fa-external-link-alt"></i> Acessar
-              </a></td>
-            `;
-            clientProposalsList.appendChild(row);
+            snapshot.forEach(doc => {
+              const proposal = doc.data();
+              let statusClass = '', statusText = '';
+              
+              switch(proposal.status) {
+                case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
+                case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
+                case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
+                case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
+              }
+              
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${proposal.title}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td><a href="${proposal.link || '#'}" target="_blank" style="color: #1a2a6c; text-decoration: none; font-weight: bold;">
+                  <i class="fas fa-external-link-alt"></i> Acessar
+                </a></td>
+              `;
+              clientProposalsList.appendChild(row);
+            });
+          })
+          .catch(error => {
+            console.error('Erro ao carregar propostas do cliente:', error);
+            clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color: #f44336;">
+              Erro ao carregar propostas. Tente novamente mais tarde.
+            </td></tr>`;
           });
-        })
-        .catch(error => {
-          console.error('Erro ao carregar propostas do cliente:', error);
-          clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color: #f44336;">
-            Erro ao carregar propostas. Tente novamente mais tarde.
-          </td></tr>`;
-        });
+      }, 1000); // Simular tempo de carregamento
     }
+    
+    // Efeito de ripple nos botões
+    document.querySelectorAll('.ripple').forEach(button => {
+      button.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple-effect');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size/2;
+        const y = e.clientY - rect.top - size/2;
+        
+        ripple.style.width = ripple.style.height = `${size}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        ripple.style.animation = 'ripple 0.6s linear';
+        
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      });
+    });
+    
+    // Estilo para o efeito ripple
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+      }
+      
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 </body>
 </html>
