@@ -851,11 +851,12 @@
       }
     });
 
+    // CORREÇÃO: Função resetProposalForm atualizada para limpar TODOS os campos
     function resetProposalForm() {
       proposalTitleInput.value = '';
       proposalLinkInput.value = '';
       proposalStatusSelect.value = 'elaboracao';
-      clientsSelect.value = '';
+      clientsSelect.value = ''; // CORREÇÃO: Agora limpa o campo de cliente também
       currentProposalId = null;
     }
 
@@ -879,6 +880,7 @@
           proposals.push({ ...doc.data(), docId: doc.id });
         });
 
+        // CORREÇÃO: Atualizar automaticamente a lista e o markdown
         renderProposals();
         generateMarkdown();
       }).catch(error => {
@@ -959,14 +961,12 @@
       markdownOutput.textContent = markdown;
     }
 
-    // Aplicar filtro
     // Aplicar filtro automaticamente ao mudar o cliente
-proposalFilter.addEventListener('change', () => {
-  currentFilter = proposalFilter.value;
-  renderProposals();
-  generateMarkdown();
-});
-
+    proposalFilter.addEventListener('change', () => {
+      currentFilter = proposalFilter.value;
+      renderProposals();
+      generateMarkdown();
+    });
 
     // Download markdown
     document.getElementById('download-md').addEventListener('click', () => {
@@ -1008,7 +1008,7 @@ proposalFilter.addEventListener('change', () => {
       db.collection('propostas').doc(docId).delete()
         .then(() => {
           showNotification('Proposta excluída com sucesso!');
-          loadProposals();
+          loadProposals(); // CORREÇÃO: Atualizar lista automaticamente após exclusão
         });
     }
   </script>
