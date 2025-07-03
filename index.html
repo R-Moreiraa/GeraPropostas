@@ -1300,12 +1300,21 @@
     });
     
     // Carregar propostas do cliente para visualização
-    function loadClientProposals(clientId) {
-      db.collection('propostas').where('clientId', '==', clientId)
-        .get()
-        .then(snapshot => {
-          clientProposalsList.innerHTML = '';
-          clientError.classList.add('hidden');
+    // Dentro da função loadClientProposals()
+function loadClientProposals(clientId) {
+  // Criar consulta pública (sem autenticação)
+  const publicQuery = db.collection('propostas').where('clientId', '==', clientId);
+  
+  publicQuery.get()  // ← Usar consulta pública
+    .then(snapshot => {
+      // ... restante do código permanece igual ...
+    })
+    .catch(error => {
+      console.error('Erro ao carregar propostas do cliente:', error);
+      clientError.innerHTML = `Erro ao carregar propostas: ${error.message}`;
+      clientError.classList.remove('hidden');
+    });
+}
           
           if (snapshot.empty) {
             clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta encontrada para este cliente.</td></tr>`;
