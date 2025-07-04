@@ -6,6 +6,7 @@
   <title>Gerador de Propostas - Links Firebase</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+    /* Seu CSS existente aqui */
     * {
       margin: 0;
       padding: 0;
@@ -151,7 +152,7 @@
       padding: 10px;
       text-align: center;
       height: 10px;
-    } 
+    }
     
     .proposal-list tr:nth-child(even) {
       background-color: #f9f9f9;
@@ -735,7 +736,7 @@
   <script>
     // Configuração Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg",
+      apiKey: "AIzaSyAhue_2qisBA2Ihe6WPKfonf0NSE4WZnPg", // Sua chave API do Firebase
       authDomain: "gera-propostas.firebaseapp.com",
       projectId: "gera-propostas",
       storageBucket: "gera-propostas.appspot.com",
@@ -838,7 +839,10 @@
       const password = loginPasswordInput.value.trim();
 
       // Validação de email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[^
+\s@]+@[^
+\s@]+\.[^
+\s@]+$/;
       if (!emailRegex.test(email)) {
         showNotification('Formato de e-mail inválido!', false);
         return;
@@ -901,193 +905,186 @@
       }).catch(error => {
         showNotification('Erro ao desconectar: ' + error.message, false);
       }).finally(() => {
-        setLoading(logoutBtn, false, '<i class="fas fa-sign-out-alt"></i> Sair');
+        setLoading(logoutBtn, false, logoutBtnText);
       });
     });
 
-    // Verificar estado de autenticação
+    // Monitorar estado de autenticação
     auth.onAuthStateChanged(user => {
-      if (user && !clientIdParam) {
-        userEmailSpan.textContent = user.email;
-        loginSection.classList.add('hidden');
-        appSection.classList.remove('hidden');
-        loadClients();
-        loadProposals();
-      } else if (!clientIdParam) {
-        loginSection.classList.remove('hidden');
-        appSection.classList.add('hidden');
+      if (user) {
+        if (!clientIdParam) { // Só mostra a aplicação principal se não estiver no modo de visualização de cliente
+          userEmailSpan.textContent = user.email;
+          loginSection.classList.add('hidden');
+          appSection.classList.remove('hidden');
+          loadClients();
+          loadProposals();
+        }
+      } else {
+        if (!clientIdParam) { // Só mostra a tela de login se não estiver no modo de visualização de cliente
+          loginSection.classList.remove('hidden');
+          appSection.classList.add('hidden');
+        }
       }
     });
 
-    // --- CLIENTES ---
-
-    function loadClients() {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      db.collection('clientes').orderBy('name').get()
-        .then(snapshot => {
-          clients = [];
-          clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
-          proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
-
-          if (snapshot.empty) {
-            return;
-          }
-
-          snapshot.forEach(doc => {
-            const client = { ...doc.data(), docId: doc.id };
-            clients.push(client);
-
-            // Adicionar ao seletor de clientes
-            const option = document.createElement('option');
-            option.value = client.docId;
-            option.textContent = client.name;
-            clientsSelect.appendChild(option);
-
-            // Adicionar ao filtro
-            const filterOption = document.createElement('option');
-            filterOption.value = client.docId;
-            filterOption.textContent = client.name;
-            proposalFilter.appendChild(filterOption);
-          });
-        })
-        .catch(error => {
-          showNotification('Erro ao carregar clientes: ' + error.message, false);
-        });
-    }
-
+    // Adicionar Cliente
     addClientBtn.addEventListener('click', () => {
-      const name = clientNameInput.value.trim();
-      if (!name) {
-        showNotification('Por favor, insira o nome do cliente!', false);
+      const clientName = clientNameInput.value.trim();
+      if (!clientName) {
+        showNotification('Por favor, digite o nome do cliente!', false);
         return;
       }
 
       const addClientBtnText = addClientBtn.innerHTML;
       setLoading(addClientBtn, true, addClientBtnText);
 
-      db.collection('clientes').add({ name })
-        .then(() => {
-          showNotification('Cliente cadastrado com sucesso!');
-          clientNameInput.value = '';
-          loadClients();
-        })
-        .catch(() => {
-          showNotification('Erro ao cadastrar cliente!', false);
-        })
-        .finally(() => {
-          setLoading(addClientBtn, false, '<i class="fas fa-user-plus"></i> Cadastrar Cliente');
-        });
+      db.collection('clientes').add({
+        name: clientName,
+        userId: auth.currentUser.uid, // Associa o cliente ao usuário logado
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        showNotification('Cliente adicionado com sucesso!');
+        clientNameInput.value = '';
+        loadClients(); // Recarrega a lista de clientes
+      })
+      .catch(error => {
+        console.error('Erro ao adicionar cliente:', error);
+        showNotification('Erro ao adicionar cliente: ' + error.message, false);
+      })
+      .finally(() => {
+        setLoading(addClientBtn, false, '<i class="fas fa-user-plus"></i> Cadastrar Cliente');
+      });
     });
 
-    // --- PROPOSTAS ---
+    // Carregar Clientes
+    function loadClients() {
+      db.collection('clientes')
+        .where('userId', '==', auth.currentUser.uid) // Filtra clientes pelo usuário logado
+        .orderBy('name')
+        .onSnapshot(snapshot => {
+          clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          populateClientSelects();
+        }, error => {
+          console.error('Erro ao carregar clientes:', error);
+          showNotification('Erro ao carregar clientes: ' + error.message, false);
+        });
+    }
 
+    function populateClientSelects() {
+      clientsSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+      proposalFilter.innerHTML = '<option value="all">Todos os Clientes</option>';
+
+      clients.forEach(client => {
+        const option = document.createElement('option');
+        option.value = client.id;
+        option.textContent = client.name;
+        clientsSelect.appendChild(option);
+
+        const filterOption = option.cloneNode(true);
+        proposalFilter.appendChild(filterOption);
+      });
+
+      // Manter o filtro selecionado após a atualização
+      proposalFilter.value = currentFilter;
+    }
+
+    // Adicionar/Atualizar Proposta
     addProposalBtn.addEventListener('click', () => {
+      const clientId = clientsSelect.value;
+      const clientName = clientsSelect.options[clientsSelect.selectedIndex].textContent;
       const title = proposalTitleInput.value.trim();
       const link = proposalLinkInput.value.trim();
       const status = proposalStatusSelect.value;
-      const clientId = clientsSelect.value;
 
-      if (!clientId) return showNotification('Por favor, selecione um cliente!', false);
-      if (!title) return showNotification('Por favor, insira um título para a proposta!', false);
-
-      const client = clients.find(c => c.docId === clientId);
-      if (!client) return showNotification('Cliente inválido!', false);
-
-      const proposalData = {
-        title,
-        link,
-        status,
-        clientId,
-        clientName: client.name,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
+      if (!clientId || !title || !link || !status) {
+        showNotification('Por favor, preencha todos os campos da proposta!', false);
+        return;
+      }
 
       const addProposalBtnText = addProposalBtn.innerHTML;
       setLoading(addProposalBtn, true, addProposalBtnText);
 
-      // Se estiver editando
+      const proposalData = {
+        clientId: clientId,
+        clientName: clientName,
+        title: title,
+        link: link,
+        status: status,
+        userId: auth.currentUser.uid, // Associa a proposta ao usuário logado
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
       if (currentProposalId) {
+        // Atualizar proposta existente
         db.collection('propostas').doc(currentProposalId).update(proposalData)
           .then(() => {
             showNotification('Proposta atualizada com sucesso!');
-            resetProposalForm();
-            loadProposals();
+            resetForm();
           })
-          .catch(() => showNotification('Erro ao atualizar proposta!', false))
+          .catch(error => {
+            console.error('Erro ao atualizar proposta:', error);
+            showNotification('Erro ao atualizar proposta: ' + error.message, false);
+          })
           .finally(() => {
             setLoading(addProposalBtn, false, '<i class="fas fa-save"></i> Salvar Proposta');
           });
-      } 
-      // Se for nova proposta
-      else {
-        proposalData.id = Date.now();
+      } else {
+        // Adicionar nova proposta
         db.collection('propostas').add(proposalData)
           .then(() => {
             showNotification('Proposta adicionada com sucesso!');
-            resetProposalForm();
-            loadProposals();
+            resetForm();
           })
-          .catch(() => showNotification('Erro ao adicionar proposta!', false))
+          .catch(error => {
+            console.error('Erro ao adicionar proposta:', error);
+            showNotification('Erro ao adicionar proposta: ' + error.message, false);
+          })
           .finally(() => {
             setLoading(addProposalBtn, false, '<i class="fas fa-save"></i> Salvar Proposta');
           });
       }
     });
 
-    // Função resetProposalForm atualizada para limpar TODOS os campos
-    function resetProposalForm() {
+    function resetForm() {
+      clientsSelect.value = '';
       proposalTitleInput.value = '';
       proposalLinkInput.value = '';
       proposalStatusSelect.value = 'elaboracao';
-      clientsSelect.value = '';
       currentProposalId = null;
+      addProposalBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Proposta';
     }
 
+    // Carregar Propostas
     function loadProposals() {
-      const user = auth.currentUser;
-      if (!user) return;
+      let query = db.collection('propostas')
+        .where('userId', '==', auth.currentUser.uid) // Filtra propostas pelo usuário logado
+        .orderBy('createdAt', 'desc');
 
-      db.collection('propostas').orderBy('createdAt', 'desc').get().then((querySnapshot) => {
-        proposals = [];
-        proposalsList.innerHTML = '';
+      if (currentFilter !== 'all') {
+        query = query.where('clientId', '==', currentFilter);
+      }
 
-        if (querySnapshot.empty) {
-          proposalsList.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 30px;">
-          <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
-          <p>Nenhuma proposta cadastrada ainda.</p></td></tr>`;
-          markdownOutput.textContent = '## Nenhuma proposta cadastrada';
-          return;
-        }
-
-        querySnapshot.forEach((doc) => {
-          proposals.push({ ...doc.data(), docId: doc.id });
-        });
-
+      query.onSnapshot(snapshot => {
+        proposals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderProposals();
-        generateMarkdown();
-      }).catch(error => {
+        generateMarkdownTable();
+      }, error => {
+        console.error('Erro ao carregar propostas:', error);
         showNotification('Erro ao carregar propostas: ' + error.message, false);
       });
     }
 
     function renderProposals() {
       proposalsList.innerHTML = '';
-
-      if(proposals.length === 0){
-        proposalsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px;">Nenhuma proposta cadastrada.</td></tr>`;
+      if (proposals.length === 0) {
+        proposalsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px;">Nenhuma proposta encontrada.</td></tr>`;
         return;
       }
 
-      // Filtrar propostas pelo cliente selecionado
-      let filteredProposals = proposals;
-      if (currentFilter !== "all") {
-        filteredProposals = proposals.filter(p => p.clientId === currentFilter);
-      }
-
-      filteredProposals.forEach(proposal => {
+      proposals.forEach(proposal => {
         let statusClass = '', statusText = '';
+
         switch(proposal.status) {
           case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
           case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
@@ -1096,192 +1093,196 @@
         }
 
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${proposal.title}</td>
+        row.innerHTML = `
+          <td>${proposal.title}</td>
           <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          <td>${proposal.clientName || 'Sem cliente'}</td>
+          <td>${proposal.clientName}</td>
           <td>
-            <button class="action-btn edit-btn" onclick="editProposalByDocId('${proposal.docId}')"><i class="fas fa-edit"></i></button>
-            <button class="action-btn delete-btn" onclick="deleteProposalByDocId('${proposal.docId}')"><i class="fas fa-trash-alt"></i></button>
-          </td>`;
-
+            <button class="action-btn edit-btn" data-id="${proposal.id}">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="action-btn delete-btn" data-id="${proposal.id}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
         proposalsList.appendChild(row);
+      });
+
+      // Adicionar listeners para botões de editar e deletar
+      document.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', (e) => editProposal(e.currentTarget.dataset.id));
+      });
+      document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', (e) => deleteProposal(e.currentTarget.dataset.id));
       });
     }
 
-    function generateMarkdown() {
+    function editProposal(id) {
+      const proposalToEdit = proposals.find(p => p.id === id);
+      if (proposalToEdit) {
+        clientsSelect.value = proposalToEdit.clientId;
+        proposalTitleInput.value = proposalToEdit.title;
+        proposalLinkInput.value = proposalToEdit.link;
+        proposalStatusSelect.value = proposalToEdit.status;
+        currentProposalId = id;
+        addProposalBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Proposta';
+      }
+    }
+
+    function deleteProposal(id) {
+      if (confirm('Tem certeza que deseja deletar esta proposta?')) {
+        db.collection('propostas').doc(id).delete()
+          .then(() => {
+            showNotification('Proposta deletada com sucesso!');
+          })
+          .catch(error => {
+            console.error('Erro ao deletar proposta:', error);
+            showNotification('Erro ao deletar proposta: ' + error.message, false);
+          });
+      }
+    }
+
+    // Filtrar propostas
+    proposalFilter.addEventListener('change', (e) => {
+      currentFilter = e.target.value;
+      loadProposals();
+    });
+
+    // Gerar Tabela Markdown
+    function generateMarkdownTable() {
+      let markdown = `| Título | Status | Cliente | Link |
+|---|---|---|---|
+`;
+
       if (proposals.length === 0) {
-        markdownOutput.textContent = '## Nenhuma proposta cadastrada';
+        markdownOutput.textContent = markdown + `| Nenhuma proposta encontrada. | | | |`;
         return;
       }
 
-      // Filtrar propostas pelo cliente selecionado
-      let filteredProposals = proposals;
-      if (currentFilter !== "all") {
-        filteredProposals = proposals.filter(p => p.clientId === currentFilter);
-      }
-
-      let markdown = '';
-      
-      if (currentFilter === "all") {
-        markdown += '## Lista de Propostas para Todos os Clientes\n\n';
-      } else {
-        const client = clients.find(c => c.docId === currentFilter);
-        markdown += `## Lista de Propostas para: ${client ? client.name : 'Cliente Selecionado'}\n\n`;
-      }
-
-      markdown += '| Título | Status | Cliente | Link |\n';
-      markdown += '|--------|--------|---------|------|\n';
-
-      filteredProposals.forEach(p => {
-        const statusMap = {
-          'elaboracao': 'Em elaboração',
-          'aprovacao': 'Em aprovação do cliente',
-          'aprovado': 'Aprovado',
-          'cancelado': 'Cancelado'
-        };
-        markdown += `| ${p.title} | ${statusMap[p.status]} | ${p.clientName || '-'} | [Link](${p.link || '#'}) |\n`;
+      proposals.forEach(proposal => {
+        let statusText = '';
+        switch(proposal.status) {
+          case 'elaboracao': statusText = 'Em Elaboração'; break;
+          case 'aprovacao': statusText = 'Em Aprovação'; break;
+          case 'aprovado': statusText = 'Aprovado'; break;
+          case 'cancelado': statusText = 'Cancelado'; break;
+        }
+        markdown += `| ${proposal.title} | ${statusText} | ${proposal.clientName} | [Acessar](${proposal.link}) |
+`;
       });
-
       markdownOutput.textContent = markdown;
     }
 
-    // Aplicar filtro automaticamente ao mudar o cliente
-    proposalFilter.addEventListener('change', () => {
-      currentFilter = proposalFilter.value;
-      renderProposals();
-      generateMarkdown();
-    });
-
-    // Download markdown
+    // Baixar Markdown
     document.getElementById('download-md').addEventListener('click', () => {
-      const markdown = markdownOutput.textContent;
-      const blob = new Blob([markdown], { type: 'text/markdown' });
+      const markdownContent = markdownOutput.textContent;
+      const blob = new Blob([markdownContent], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      
-      if (currentFilter === "all") {
-        a.download = 'propostas-todos.md';
-      } else {
-        const client = clients.find(c => c.docId === currentFilter);
-        a.download = `propostas-${client ? client.name.replace(/\s+/g, '-') : 'cliente'}.md`;
-      }
-      
+      a.download = 'propostas.md';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showNotification('Markdown baixado com sucesso!');
     });
 
-    // Funções globais para os botões de ação
-    window.editProposalByDocId = function(docId) {
-      const proposal = proposals.find(p => p.docId === docId);
-      if (!proposal) return;
-
-      proposalTitleInput.value = proposal.title;
-      proposalLinkInput.value = proposal.link || '';
-      proposalStatusSelect.value = proposal.status;
-      clientsSelect.value = proposal.clientId || '';
-      currentProposalId = docId;
-
-      showNotification('Proposta carregada para edição!');
-    }
-
-    window.deleteProposalByDocId = function(docId) {
-      if (!confirm('Tem certeza que deseja excluir esta proposta?')) return;
-
-      db.collection('propostas').doc(docId).delete()
-        .then(() => {
-          showNotification('Proposta excluída com sucesso!');
-          loadProposals();
-        });
-    }
-    
-    // --- GERAR LINKS DE TABELA ---
-    
-    // Gerar link para tabela do cliente
+    // Modal de Link
     generateLinkBtn.addEventListener('click', () => {
-      if (currentFilter === 'all') {
-        showNotification('Selecione um cliente específico para gerar o link.', false);
+      const selectedClientId = proposalFilter.value;
+      if (selectedClientId === 'all' || !selectedClientId) {
+        showNotification('Por favor, selecione um cliente para gerar o link.', false);
         return;
       }
-      
-      currentClientForLink = clients.find(c => c.docId === currentFilter);
-      if (!currentClientForLink) return;
-      
-      // Gerar URL única para o cliente
+
+      currentClientForLink = clients.find(c => c.id === selectedClientId);
+      if (!currentClientForLink) {
+        showNotification('Cliente não encontrado.', false);
+        return;
+      }
+
       const baseUrl = window.location.href.split('?')[0];
-      const url = `${baseUrl}?clientId=${currentClientForLink.docId}`;
-      
-      iframeLink.value = url;
-      
-      // Gerar código iframe
-      const iframeHtml = `<iframe src="${url}" width="100%" height="500" frameborder="0" style="border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);"></iframe>`;
-      iframeCode.value = iframeHtml;
-      
-      // Exibir modal
+      const link = `${baseUrl}?clientId=${currentClientForLink.id}`;
+      iframeLink.value = link;
+      iframeCode.value = `<iframe src="${link}" width="100%" height="500px" frameborder="0"></iframe>`;
       linkModal.style.display = 'block';
     });
-    
-    // Copiar código iframe
+
+    closeModal.addEventListener('click', () => {
+      linkModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target == linkModal) {
+        linkModal.style.display = 'none';
+      }
+    });
+
     copyCodeBtn.addEventListener('click', () => {
       iframeCode.select();
       document.execCommand('copy');
       showNotification('Código copiado para a área de transferência!');
     });
-    
-    // Fechar modal
-    closeModal.addEventListener('click', () => {
-      linkModal.style.display = 'none';
-    });
-    
-    window.addEventListener('click', (e) => {
-      if (e.target === linkModal) {
-        linkModal.style.display = 'none';
-      }
-    });
-    
-    // Carregar propostas do cliente para visualização
+
+    // Função para carregar propostas para a visualização do cliente (com autenticação anônima)
     function loadClientProposals(clientId) {
-      db.collection('propostas').where('clientId', '==', clientId)
-        .orderBy('createdAt', 'desc')
-        .get()
-        .then(snapshot => {
-          clientProposalsList.innerHTML = '';
-          
-          if (snapshot.empty) {
-            clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta encontrada para este cliente.</td></tr>`;
-            return;
-          }
-          
-          snapshot.forEach(doc => {
-            const proposal = doc.data();
-            let statusClass = '', statusText = '';
-            
-            switch(proposal.status) {
-              case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
-              case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
-              case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
-              case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
-            }
-            
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${proposal.title}</td>
-              <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-              <td><a href="${proposal.link || '#'}" target="_blank" style="color: #1a2a6c; text-decoration: none; font-weight: bold;">
-                <i class="fas fa-external-link-alt"></i> Acessar
-              </a></td>
-            `;
-            clientProposalsList.appendChild(row);
-          });
+      // 1. Tentar autenticar anonimamente
+      auth.signInAnonymously()
+        .then(() => {
+          // 2. Após autenticação anônima bem-sucedida, carregar propostas
+          // O usuário anônimo agora está autenticado.
+          // Suas regras de segurança do Firestore precisarão permitir que este usuário anônimo
+          // leia as propostas associadas ao 'clientId' fornecido.
+          db.collection('propostas').where('clientId', '==', clientId)
+            .orderBy('createdAt', 'desc')
+            .get()
+            .then(snapshot => {
+              clientProposalsList.innerHTML = '';
+
+              if (snapshot.empty) {
+                clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Nenhuma proposta encontrada para este cliente.</td></tr>`;
+                return;
+              }
+
+              snapshot.forEach(doc => {
+                const proposal = doc.data();
+                let statusClass = '', statusText = '';
+
+                switch(proposal.status) {
+                  case 'elaboracao': statusClass = 'status-elaboracao'; statusText = '🟡 Em Elaboração'; break;
+                  case 'aprovacao': statusClass = 'status-aprovacao'; statusText = '🟠 Em Aprovação do Cliente'; break;
+                  case 'aprovado': statusClass = 'status-aprovado'; statusText = '🟢 Aprovado'; break;
+                  case 'cancelado': statusClass = 'status-cancelado'; statusText = '🔴 Cancelado'; break;
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${proposal.title}</td>
+                  <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                  <td><a href="${proposal.link || '#'}" target="_blank" style="color: #1a2a6c; text-decoration: none; font-weight: bold;">
+                    <i class="fas fa-external-link-alt"></i> Acessar
+                  </a></td>
+                `;
+                clientProposalsList.appendChild(row);
+              });
+            })
+            .catch(error => {
+              console.error('Erro ao carregar propostas do cliente:', error);
+              clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color: #f44336;">
+                Erro ao carregar propostas. Tente novamente mais tarde.
+              </td></tr>`;
+            });
         })
         .catch(error => {
-          console.error('Erro ao carregar propostas do cliente:', error);
+          console.error("Erro na autenticação anônima:", error);
           clientProposalsList.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color: #f44336;">
-            Erro ao carregar propostas. Tente novamente mais tarde.
+            Não foi possível acessar as propostas. Por favor, tente novamente.
           </td></tr>`;
         });
     }
   </script>
 </body>
 </html>
+
+
