@@ -838,12 +838,8 @@
       const email = loginEmailInput.value.trim();
       const password = loginPasswordInput.value.trim();
 
-      // Validação de email
       const emailRegex = /^[^
-\s@]+@[^
-\s@]+\.[^
-\s@]+$/;
-      if (!emailRegex.test(email)) {
+\s@]+@[^\s@]+\.[^\s@]+$/;
         showNotification('Formato de e-mail inválido!', false);
         return;
       }
@@ -1284,5 +1280,3 @@
   </script>
 </body>
 </html>
-
-
